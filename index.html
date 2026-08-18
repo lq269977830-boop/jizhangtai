@@ -473,7 +473,13 @@ textarea{min-height:56px;resize:none;margin-top:8px}
 .quick-btn:nth-child(2),.quick-btn:nth-child(3){background:rgba(255,255,255,.6);color:var(--ink);box-shadow:var(--sh-sm);border:1px solid rgba(255,255,255,.8)}
 .cal-d>span{font-size:14px;font-weight:600;line-height:1.2;margin-bottom:1px;z-index:2}
 
-.goal-info{display:flex;flex-direction:column;gap:2px;min-width:0;text-align:left}</style>
+.goal-info{display:flex;flex-direction:column;gap:2px;min-width:0;text-align:left}
+.ocr-list{display:flex;flex-direction:column;gap:10px;margin:14px 0 18px}
+.ocr-row{position:relative;background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:12px 44px 12px 14px}
+.ocr-amt{font-size:18px;font-weight:700;font-family:var(--num);color:var(--ink)}
+.ocr-meta{font-size:12.5px;color:var(--ink-2);margin-top:3px}
+.ocr-note{font-size:12px;color:var(--ink-3);margin-top:4px}
+.ocr-x{position:absolute;top:50%;right:12px;transform:translateY(-50%);width:26px;height:26px;border-radius:50%;border:1px solid var(--card-border);background:transparent;color:var(--ink-2);font-size:13px;display:flex;align-items:center;justify-content:center}</style>
 </head>
 <body>
 <div class="wrap">
@@ -1219,15 +1225,16 @@ function aiVisionOCR(dataUrl,st){
   st.innerHTML='<span class="spinner"></span>AI 视觉识别中…';
   let b64=dataUrl.split(",")[1];
   let url=(aiV.url||"").replace(/\/+$/,"")+"/chat/completions";
-  let prompt="请识别这张消费账单或小票图片，提取信息并以 JSON 返回，字段：amount(数字,必填,单位元),type(\"in\"表示收入如工资/退款,\"out\"表示支出,默认out),cat(类别中文,如餐饮/交通/购物/工资/转账/话费),date(YYYY-MM-DD,可据票面估算),note(简短说明,可选)。只返回纯JSON,不要任何解释或代码块。";
+  let prompt="请识别这张消费账单或小票图片。如果图片中有多条消费或收入记录，请返回一个 JSON 数组，每个元素包含字段：amount(数字,必填,单位元)、type(\"in\"表示收入如工资/退款,\"out\"表示支出,默认out)、cat(类别中文,如餐饮/交通/购物/工资/话费/早餐/午餐/晚餐/奶茶/网购)、date(YYYY-MM-DD,可据票面估算)、note(简短说明,可选)。即使只有一条记录也要返回包含该元素的数组。只返回纯JSON数组,不要任何解释或代码块标记。";
   let h={"Content-Type":"application/json","Authorization":"Bearer "+aiV.key};if(aiV.token)h["X-Proxy-Token"]=aiV.token;
   fetch(url,{method:"POST",headers:h,
     body:JSON.stringify({model:aiV.model,messages:[{role:"user",content:[{type:"text",text:prompt},{type:"image_url",image_url:{url:"data:image/jpeg;base64,"+b64}}]}],temperature:0.1})})
   .then(r=>{if(!r.ok)return r.text().then(t=>{throw new Error("上游HTTP"+r.status+": "+t.slice(0,160))});return r.json()}).then(d=>{
     let txt="";try{txt=(d.choices&&d.choices[0]&&d.choices[0].message.content)||"";}catch(e){txt="";}
-    let m=txt.match(/\{[\s\S]*\}/);if(!m){st.innerHTML="AI 未返回有效 JSON，已回退本地 OCR";tesseractOCR(dataUrl,st);return;}
-    let obj;try{obj=JSON.parse(m[0]);}catch(e){st.innerHTML="AI 结果解析失败，已回退本地 OCR";tesseractOCR(dataUrl,st);return;}
-    fillFromOCR(obj,st);})
+    let list=parseAIVision(txt);
+    if(!list||!list.length){st.innerHTML="AI 未返回有效数据，已回退本地 OCR";tesseractOCR(dataUrl,st);return;}
+    if(list.length===1){fillFromOCR(list[0],st);}
+    else{showOCRMulti(list,st,_pendingImg);} })
   .catch(e=>{let msg=(e&&e.message||"").slice(0,140);st.innerHTML="AI 识别失败："+(msg||"网络/接口错误")+"，已回退本地 OCR";tesseractOCR(dataUrl,st);});}
 function tesseractOCR(dataUrl,st){
   if(window.Tesseract){let _to=false;
@@ -1251,6 +1258,60 @@ function fillFromOCR(obj,st){
   if(obj.date){let di=document.getElementById("dateInp");if(di){di.value=obj.date;updateDateLbl();parts.push(obj.date)}}
   if(obj.note){document.getElementById("note").value=obj.note;}
   st.innerHTML="AI 识别完成："+parts.join(" · ")+"（请核对后保存）";}
+function catNameToKey(name,type){
+  if(!name)return type==="in"?"salary":"other";
+  name=(""+name).trim();
+  let c=CATS.find(x=>x.n===name);if(c)return c.k;
+  for(let kv of VOICE_CAT){if(kv[1].includes(name))return kv[0];}
+  let cu=state.custom.find(x=>x.n===name);if(cu)return cu.k;
+  for(let kv of VOICE_CAT){if(kv[1].some(s=>name.indexOf(s)>=0||s.indexOf(name)>=0))return kv[0];}
+  let cf=state.custom.find(x=>name.indexOf(x.n)>=0||x.n.indexOf(name)>=0);if(cf)return cf.k;
+  return type==="in"?"salary":"other";
+}
+let _ocrPendingList=[],_ocrImg=null;
+function parseAIVision(txt){
+  txt=(""+txt).trim().replace(/^```(?:json)?/i,"").replace(/```$/,"").trim();
+  let am=txt.match(/\[[\s\S]*\]/);
+  if(am){try{let a=JSON.parse(am[0]);if(Array.isArray(a))return a;}catch(e){}}
+  let om=txt.match(/\{[\s\S]*\}/);
+  if(om){try{let o=JSON.parse(om[0]);if(o&&typeof o==="object"){if(Array.isArray(o.items))return o.items;if(Array.isArray(o.records))return o.records;if(Array.isArray(o.list))return o.list;return [o];}}catch(e){}}
+  return null;
+}
+function catNameOf(k){let c=CATS.concat(state.custom).find(x=>x.k===k);return c?c.n:k;}
+function showOCRMulti(list,st,img){
+  _ocrPendingList=list.filter(it=>it&&(it.amount||it.amt)).map(it=>({
+    amount:Number(it.amount||it.amt)||0,
+    type:it.type==="in"?"in":"out",
+    cat:catNameToKey(it.cat||it.category,it.type),
+    catName:it.cat||it.category||"",
+    date:it.date||ymd(new Date()),
+    note:it.note||it.desc||""
+  })).filter(it=>it.amount>0);
+  _ocrImg=img||null;
+  if(!_ocrPendingList.length){st.innerHTML="AI 未识别到金额记录，请手动填写";return;}
+  renderOCRMulti();
+  st.innerHTML="AI 识别完成 "+_ocrPendingList.length+" 条（已列出供核对）";
+}
+function renderOCRMulti(){
+  let rows=_ocrPendingList.map((it,idx)=>`<div class="ocr-row">
+    <div class="ocr-amt">¥${it.amount.toFixed(2)}</div>
+    <div class="ocr-meta">${it.type==="in"?"收入":"支出"} · ${catNameOf(it.cat)} · ${it.date}</div>
+    ${it.note?`<div class="ocr-note">${it.note.replace(/</g,"&lt;")}</div>`:""}
+    <button class="ocr-x" onclick="ocrDrop(${idx})">✕</button>
+  </div>`).join("");
+  openSheet(`<div class="grab"></div><h2>AI 识别到 ${_ocrPendingList.length} 条</h2>
+    <div class="deck">核对金额与类别，点 ✕ 可移除错误项，确认后批量保存</div>
+    <div class="ocr-list">${rows}</div>
+    <button class="btn-pill" onclick="ocrSaveAll()">保存 ${_ocrPendingList.length} 条</button>
+    <button class="btn-ghost" onclick="closeSheet()">取消</button>`);
+}
+function ocrDrop(i){_ocrPendingList.splice(i,1);if(!_ocrPendingList.length){closeSheet();return;}renderOCRMulti();}
+function ocrSaveAll(){
+  let n=_ocrPendingList.length;
+  _ocrPendingList.forEach((it,ix)=>{let rec={id:Date.now()+"_"+ix,type:it.type,cat:it.cat,amt:it.amount,note:it.note,date:it.date,ts:Date.now()};if(ix===0&&_ocrImg)rec.img=_ocrImg;state.records.push(rec);});
+  _ocrPendingList=[];_ocrImg=null;
+  save();render();renderBills();closeSheet();toast("已保存 "+n+" 条记录");
+}
 function parseAmount(txt){
   if(!txt)return null;
   let n=txt.replace(/[，,。.\s]/g,"").replace(/[Oo]/g,"0");
