@@ -740,7 +740,7 @@ let _rawCustom=JSON.parse(localStorage.getItem(KEY+"_c")||"[]");
 _rawCustom.forEach(c=>{if(!c.type)c.type="out"});
 let state={records:JSON.parse(localStorage.getItem(KEY)||"[]"),budget:JSON.parse(localStorage.getItem(KEY+"_b")||"{\"inc\":0,\"exp\":0}"),custom:_rawCustom};
 // AI 视觉识别配置（独立于 records，不进导出）
-let aiV={url:localStorage.getItem(KEY+"_avurl")||"https://ark.cn-beijing.volces.com/api/v3",key:localStorage.getItem(KEY+"_avkey")||"",model:localStorage.getItem(KEY+"_avmodel")||"doubao-vision-pro-32k",token:localStorage.getItem(KEY+"_avtoken")||""};
+let aiV={url:localStorage.getItem(KEY+"_avurl")||"https://qwen-proxy.lq269977830.workers.dev/v1",key:localStorage.getItem(KEY+"_avkey")||"",model:localStorage.getItem(KEY+"_avmodel")||"qwen-vl-max",token:localStorage.getItem(KEY+"_avtoken")||""};
 function saveAiV(){localStorage.setItem(KEY+"_avurl",aiV.url);localStorage.setItem(KEY+"_avkey",aiV.key);localStorage.setItem(KEY+"_avmodel",aiV.model);localStorage.setItem(KEY+"_avtoken",aiV.token)}
 function save(){localStorage.setItem(KEY,JSON.stringify(state.records));localStorage.setItem(KEY+"_b",JSON.stringify(state.budget));localStorage.setItem(KEY+"_c",JSON.stringify(state.custom))}
 const today=new Date();let curY=today.getFullYear(),curM=today.getMonth();
@@ -1230,9 +1230,15 @@ function aiVisionOCR(dataUrl,st){
   fetch(url,{method:"POST",headers:h,
     body:JSON.stringify({model:aiV.model,messages:[{role:"user",content:[{type:"text",text:prompt},{type:"image_url",image_url:{url:"data:image/jpeg;base64,"+b64}}]}],temperature:0.1})})
   .then(r=>{if(!r.ok)return r.text().then(t=>{throw new Error("上游HTTP"+r.status+": "+t.slice(0,160))});return r.json()}).then(d=>{
+    // 千问/豆包 OpenAI 兼容接口在 模型名错/Key无效/额度不足 时，常返回 HTTP 200 + {code,message} 错误体（无 choices）
+    if(d&&!(d.choices)&&(d.error||d.code||d.message)){
+      let reason=(d.error&&d.error.message)||d.message||("错误码 "+(d.code||""));
+      st.innerHTML='<b style="color:#e5484d">AI 接口返回错误：</b>'+String(reason).slice(0,120)+'<br><span style="font-size:12px;opacity:.7">多为 模型名 / Key / 额度 问题，请到「AI 视觉识别」核对。已停止自动回退。</span>';
+      return;
+    }
     let txt="";try{txt=(d.choices&&d.choices[0]&&d.choices[0].message.content)||"";}catch(e){txt="";}
     let list=parseAIVision(txt);
-    if(!list||!list.length){st.innerHTML="AI 未返回有效数据，已回退本地 OCR";tesseractOCR(dataUrl,st);return;}
+    if(!list||!list.length){st.innerHTML="AI 返回了内容但没解析出账单条目，已回退本地 OCR";tesseractOCR(dataUrl,st);return;}
     if(list.length===1){fillFromOCR(list[0],st);}
     else{showOCRMulti(list,st,_pendingImg);} })
   .catch(e=>{let msg=(e&&e.message||"").slice(0,140);st.innerHTML="AI 识别失败："+(msg||"网络/接口错误")+"，已回退本地 OCR";tesseractOCR(dataUrl,st);});}
@@ -1326,13 +1332,13 @@ function openAiV(){
   openSheet(`<div class="grab"></div><h2>AI 视觉识别</h2>
    <div class="deck">拍照识别账单 · 支持火山方舟/通义/OpenAI 兼容</div>
    <div class="field-label">接口地址 (Base URL)</div>
-   <input type="text" id="avUrl" value="${aiV.url}" placeholder="https://ark.cn-beijing.volces.com/api/v3">
+   <input type="text" id="avUrl" value="${aiV.url}" placeholder="https://qwen-proxy.lq269977830.workers.dev/v1">
    <div class="field-label">API Key</div>
    <input type="password" id="avKey" value="${aiV.key}" placeholder="粘贴你的 key">
    <div class="field-label">模型名（接入点 ID）</div>
-   <input type="text" id="avModel" value="${aiV.model}" placeholder="接入点ID，如 ep-xxxxxx（非模型名）">
-   <div class="field-label">代理令牌（可选）</div>
-   <input type="text" id="avToken" value="${aiV.token}" placeholder="若中转设了 PROXY_TOKEN，填这里">
+   <input type="text" id="avModel" value="${aiV.model}" placeholder="qwen-vl-max">
+   <div class="field-label">代理令牌（可选 · 你的 Worker 未启用可不填）</div>
+   <input type="text" id="avToken" value="${aiV.token}" placeholder="默认留空即可">
    <div class="ocr-status">配置后拍照优先用 AI 识别（准确率高）；未填 key 则使用本地 OCR。</div>
    <button class="btn-pill" onclick="saveAiVSet()">保存</button>
    <button class="btn-ghost" onclick="closeSheet()">关闭</button>`);}
