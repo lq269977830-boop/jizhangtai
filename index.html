@@ -1443,7 +1443,7 @@ function aiVisionOCR(dataUrl,st){
     }
     let txt="";try{txt=(d.choices&&d.choices[0]&&d.choices[0].message.content)||"";}catch(e){txt="";}
     let list=parseAIVision(txt);
-    if(!list||!list.length){st.innerHTML='AI 返回了内容但没解析出账单条目。<div style="margin-top:6px;font-size:12px;opacity:.7;max-height:130px;overflow:auto;white-space:pre-wrap;word-break:break-all">原始返回：'+(String(txt).slice(0,400))+'</div><div style="margin-top:10px"><button class="btn ghost" onclick="fallbackLocalOCR()">改用本地识别</button></div>';return;}
+    if(!list||!list.length){let diag='[诊断] typeof='+typeof(txt)+' length='+String(txt).length+' 首30字='+JSON.stringify(String(txt).slice(0,30))+' 尾30字='+JSON.stringify(String(txt).slice(-30))+' 以[开头='+(String(txt).trim().indexOf('[')===0);st.innerHTML='AI 返回了内容但没解析出账单条目。'+diag+'<div style="margin-top:6px;font-size:12px;opacity:.7;max-height:130px;overflow:auto;white-space:pre-wrap;word-break:break-all">原始返回：'+(String(txt).slice(0,500))+'</div><div style="margin-top:10px"><button class="btn ghost" onclick="fallbackLocalOCR()">改用本地识别</button></div>';return;}
     if(list.length===1){fillFromOCR(list[0],st);}
     else{showOCRMulti(list,st,_pendingImg);} })
   .catch(e=>{
