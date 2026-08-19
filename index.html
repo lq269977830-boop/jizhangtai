@@ -1456,12 +1456,19 @@ function vDown(e,btn){
     let s={id:"v"+Date.now()+Math.random().toString(36).slice(2,7),pointerId:e.pointerId,btn,stream,rec,chunks:[],startTs:Date.now(),timer:null,dur:0,status:"rec"};
     rec.ondataavailable=ev=>{if(ev.data&&ev.data.size)s.chunks.push(ev.data)};
     rec.onstop=()=>{s.status="done";if(s.timer)clearInterval(s.timer);s.stream.getTracks().forEach(t=>t.stop());updateVoiceBtn();finalizeVoice(s)};
-    rec.start(250);
+    try{rec.start(250)}catch(err){s.stream.getTracks().forEach(t=>t.stop());toast("录音启动失败，请重试");return}
     s.timer=setInterval(()=>{s.dur=(Date.now()-s.startTs)/1000;updateVoiceBtn();if(s.dur>=VOICE_MAX_SEC){try{rec.stop()}catch(err){}}},200);
     voiceSessions.push(s);
     updateVoiceBtn();
     toast("录音中… 松开停止");
-  }).catch(err=>{toast("麦克风："+((err&&err.name==="NotAllowedError")?"未授权":"无法访问（"+((err&&err.name)||"错误")+"）"))});
+  }).catch(err=>{
+    let n=(err&&err.name)||"";
+    let tip=n==="NotAllowedError"?"未授权：请在浏览器地址栏锁形图标→网站设置→麦克风→选「允许」；若在微信/QQ内打开不支持录音，请改用系统浏览器(Safari/Chrome)打开"
+      :n==="NotFoundError"?"未检测到麦克风设备，请检查耳机/麦克风"
+      :n==="NotReadableError"?"麦克风被其他应用占用，关闭后再试"
+      :"无法访问麦克风（"+n+"）";
+    toast("麦克风："+tip);
+  });
 }
 function vUp(e,btn){
   e.preventDefault();
@@ -1541,7 +1548,10 @@ function asrTranscribe(wavBlob,st){
   const ctrl=new AbortController();
   const to=setTimeout(()=>ctrl.abort(),120000);
   return fetch(url,{method:"POST",headers:h,body:fd,signal:ctrl.signal})
-    .then(r=>{clearTimeout(to);return r.text().then(txt=>({status:r.status,txt}))})
+    .then(r=>{clearTimeout(to);return r.text().then(txt=>{
+      if(!r.ok){let head=(txt||"").slice(0,160).replace(/\s+/g," ");throw new Error("HTTP "+r.status+(head?" "+head:""));}
+      return {status:r.status,txt};
+    })})
     .catch(e=>{clearTimeout(to);throw e});
 }
 function parseVoiceItems(t){
