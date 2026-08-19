@@ -424,6 +424,46 @@ textarea{min-height:56px;resize:none;margin-top:8px}
 .ai-fab img{width:100%;height:100%;object-fit:cover}
 .ai-fab::after{content:"";position:absolute;inset:-3px;border-radius:50%;border:1px solid rgba(117,104,232,.28)}
 .list-empty{text-align:center;padding:40px 20px;color:var(--ink-3);font-size:13px}
+/* 账单搜索 */
+.bill-search{position:relative;margin-bottom:14px}
+.bill-search .bs-ic{position:absolute;left:16px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--ink-3);pointer-events:none}
+.bill-search input{padding-left:44px;padding-right:44px;border-radius:var(--r-pill)}
+.bill-search .bs-clear{position:absolute;right:9px;top:50%;transform:translateY(-50%);width:26px;height:26px;border:none;background:var(--bg);border-radius:50%;color:var(--ink-3);font-size:14px;cursor:pointer;display:none;place-items:center;line-height:1}
+.bill-search .bs-clear:active{background:var(--line)}
+.res-summary{font-size:12px;color:var(--ink-3);margin:2px 4px 6px}
+.res-group{margin-bottom:4px}
+.res-head{display:flex;align-items:center;justify-content:space-between;margin:16px 0 8px;padding-bottom:7px;border-bottom:1px solid var(--line)}
+.res-head .rh-l{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600}
+.res-head .rh-l .dot{width:8px;height:8px;border-radius:50%}
+.res-head .rh-l .dot.in{background:var(--inc)}
+.res-head .rh-l .dot.out{background:var(--exp)}
+.res-head .rh-r{font-size:12px;font-variant-numeric:tabular-nums}
+.res-head .rh-r.in{color:var(--inc)}
+.res-head .rh-r.out{color:var(--exp)}
+.hl{background:var(--brand-soft);color:var(--brand);border-radius:3px;padding:0 2px;font-weight:600}
+/* 日期筛选 */
+.bill-tools{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.bill-cal-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:var(--r-pill);background:var(--bg);border:1px solid var(--line);color:var(--ink-2);font-size:13px;cursor:pointer}
+.bill-cal-btn:active{background:var(--line)}
+.bill-cal-btn svg{width:15px;height:15px}
+.bill-date-tag{display:none;align-items:center;gap:6px;background:var(--bg);border-radius:var(--r-pill);padding:7px 7px 7px 14px;font-size:12px;color:var(--ink-2)}
+.bill-date-tag b{color:var(--brand);font-weight:600}
+.bill-date-tag button{border:none;background:var(--line);color:var(--ink-2);width:20px;height:20px;border-radius:50%;cursor:pointer;font-size:12px;line-height:1}
+.bill-date-tag button:active{background:var(--brand-soft)}
+/* 日期选择器弹窗 */
+.dp-head{display:flex;align-items:center;justify-content:space-between;margin:4px 0 14px}
+.dp-ym{font-size:16px;font-weight:600}
+.dp-nav{width:34px;height:34px;border-radius:50%;border:none;background:var(--bg);color:var(--ink);font-size:18px;cursor:pointer}
+.dp-nav:active{background:var(--line)}
+.dp-week,.dp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.dp-dh{text-align:center;font-size:11px;color:var(--ink-3);padding:6px 0}
+.dp-d{text-align:center;padding:11px 0;border-radius:10px;font-size:14px;cursor:pointer;color:var(--ink)}
+.dp-d.muted{color:var(--ink-3);opacity:.45}
+.dp-d:active{background:var(--line)}
+.dp-d.sel{background:var(--brand);color:#fff}
+.dp-d.selm{background:var(--brand-soft);color:var(--brand);font-weight:600}
+.dp-foot{display:flex;gap:8px;margin-top:16px}
+.dp-foot .btn{flex:1}
 .cat-edit{display:flex;align-items:center;gap:10px;padding:12px 2px;border-bottom:1px solid var(--line)}
 .cat-edit svg{width:18px;height:18px;color:var(--ink-2);flex:none}
 .cat-edit .cn{flex:1;font-size:14px}
@@ -479,7 +519,23 @@ textarea{min-height:56px;resize:none;margin-top:8px}
 .ocr-amt{font-size:18px;font-weight:700;font-family:var(--num);color:var(--ink)}
 .ocr-meta{font-size:12.5px;color:var(--ink-2);margin-top:3px}
 .ocr-note{font-size:12px;color:var(--ink-3);margin-top:4px}
-.ocr-x{position:absolute;top:50%;right:12px;transform:translateY(-50%);width:26px;height:26px;border-radius:50%;border:1px solid var(--card-border);background:transparent;color:var(--ink-2);font-size:13px;display:flex;align-items:center;justify-content:center}</style>
+.ocr-x{position:absolute;top:50%;right:12px;transform:translateY(-50%);width:26px;height:26px;border-radius:50%;border:1px solid var(--card-border);background:transparent;color:var(--ink-2);font-size:13px;display:flex;align-items:center;justify-content:center}
+.month-nav button.month-label{width:auto;height:auto;border-radius:10px;padding:4px 10px;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase}
+.month-nav button.month-label:active{background:var(--card-border)}
+.modal-mask{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:300;padding:20px}
+.modal-mask.show{display:flex}
+.month-picker{background:var(--card);border-radius:22px;padding:18px;width:100%;max-width:330px;box-shadow:0 12px 40px rgba(0,0,0,.3)}
+.mp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.mp-head span{font-weight:700;font-size:17px;color:var(--ink)}
+.mp-head button{width:38px;height:38px;border-radius:50%;border:1px solid var(--card-border);background:transparent;color:var(--ink);font-size:18px;cursor:pointer}
+.mp-head button:active{background:var(--card-border)}
+.mp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mp-cell{padding:14px 0;border-radius:14px;border:1px solid var(--card-border);background:transparent;color:var(--ink);font-size:15px;font-weight:600;cursor:pointer}
+.mp-cell.cur{background:var(--brand);color:#fff;border-color:var(--brand)}
+.mp-cell:active{filter:brightness(.95)}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:9px 16px;border-radius:14px;border:1px solid var(--card-border);background:var(--card);color:var(--ink);font-size:14px;font-weight:600;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink-2)}
+.btn:active{filter:brightness(.95)}</style>
 </head>
 <body>
 <div class="wrap">
@@ -488,9 +544,9 @@ textarea{min-height:56px;resize:none;margin-top:8px}
     <div class="brand"><div class="logo"><img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAoACgDASIAAhEBAxEB/8QAGwABAAEFAQAAAAAAAAAAAAAAAAYBAwQFBwj/xAAoEAABAwMDBAICAwAAAAAAAAABAgMEAAURBhIhBxMiMRRRMkFhcYH/xAAYAQADAQEAAAAAAAAAAAAAAAAAAgMBBP/EACIRAAEEAgEEAwAAAAAAAAAAAAEAAgMREiEEMUFRkRMUIv/aAAwDAQACEQMRAD8A9l0pShCUrSydVWCMspkXFtsdwN7ik7SonAGcYrYx58GSvZHmxnlY3YQ6lRx98GkZIx4tptZYulk0pSnWpUI6oavhafiiG/LRHceaKzlXkpPrake8k1NnEJcQpCxlKhgj7Fcf1f0Ntc1lDlhuMmLK7vkqY6p5Aa58E/sbeMc/xVGceHkAxyvLQfA977eipTOkDfwLXO7nqVTrEHUcD5zTqN6Cy06VdnnBUojxBweMj0eKvWO8zXLVedXvbX+w2sI3NoQcpSMDxwDjgZ49mpK30MmW9lxxWsJTCHE7HfgxNqyk/olS/WcVlWrpE2q0RLFcr/cW7S6oLVDYhoZWrCvxW4FK4JHOP74pp4+M3j/RikBbkDsG8LvHpvegb33Kh8MkjhKGUa3vV116+9aUw6BSblcenzd4ufC7hJcfaHIw3wkcZOAdpIH0RSpzbocW3wGIMJhDEaO2lpptA4QlIwAP8pU34ZHAUOw8BdTAWtAKv0pSlTJQkD3SlCFTIzSlKEL/2Q==" alt=""></div></div>
     <div class="center">
       <div class="month-nav">
-        <button onclick="changeMonth(-1)">‹</button>
-        <span class="month-label" id="mLabel">—</span>
-        <button onclick="changeMonth(1)">›</button>
+        <button onclick="changeMonth(-1)" aria-label="上个月">‹</button>
+        <button class="month-label" id="mLabel" onclick="openMonthPicker()" aria-label="选择月份">—</button>
+        <button onclick="changeMonth(1)" aria-label="下个月">›</button>
       </div>
     </div>
     <button class="gear" onclick="goTab('mine')">
@@ -580,6 +636,15 @@ textarea{min-height:56px;resize:none;margin-top:8px}
   <div class="view" id="view-bills">
     <div class="sec" style="margin-top:26px">
       <div class="sec-t"><h3>All Transactions</h3><span class="more" id="billCount">—</span></div>
+      <div class="bill-search">
+        <svg class="bs-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
+        <input type="text" id="billSearch" placeholder="搜索名称 / 备注 / 分类 / 日期…" oninput="onBillSearch()" />
+        <button class="bs-clear" id="bsClear" onclick="clearBillSearch()" title="清空">✕</button>
+      </div>
+      <div class="bill-tools">
+        <button class="bill-cal-btn" onclick="openDatePicker()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9h18M8 3v3M16 3v3"/></svg>选日期</button>
+        <div class="bill-date-tag" id="billDateTag"></div>
+      </div>
       <div id="billList"></div>
     </div>
   </div>
@@ -740,14 +805,30 @@ let _rawCustom=JSON.parse(localStorage.getItem(KEY+"_c")||"[]");
 _rawCustom.forEach(c=>{if(!c.type)c.type="out"});
 let state={records:JSON.parse(localStorage.getItem(KEY)||"[]"),budget:JSON.parse(localStorage.getItem(KEY+"_b")||"{\"inc\":0,\"exp\":0}"),custom:_rawCustom};
 // AI 视觉识别配置（独立于 records，不进导出）
-let aiV={url:localStorage.getItem(KEY+"_avurl")||"https://qwen-proxy.lq269977830.workers.dev/v1",key:localStorage.getItem(KEY+"_avkey")||"",model:localStorage.getItem(KEY+"_avmodel")||"qwen-vl-max",token:localStorage.getItem(KEY+"_avtoken")||""};
+let aiV={url:localStorage.getItem(KEY+"_avurl")||"https://qwen-proxy-csoaxqqpqn.cn-hangzhou.fcapp.run/v1",key:localStorage.getItem(KEY+"_avkey")||"",model:localStorage.getItem(KEY+"_avmodel")||"qwen-vl-max",token:localStorage.getItem(KEY+"_avtoken")||""};
 function saveAiV(){localStorage.setItem(KEY+"_avurl",aiV.url);localStorage.setItem(KEY+"_avkey",aiV.key);localStorage.setItem(KEY+"_avmodel",aiV.model);localStorage.setItem(KEY+"_avtoken",aiV.token)}
 function save(){localStorage.setItem(KEY,JSON.stringify(state.records));localStorage.setItem(KEY+"_b",JSON.stringify(state.budget));localStorage.setItem(KEY+"_c",JSON.stringify(state.custom))}
 const today=new Date();let curY=today.getFullYear(),curM=today.getMonth();
 function fmt(n){return Number(n).toLocaleString("zh-CN",{minimumFractionDigits:2,maximumFractionDigits:2})}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function ymd(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function inMonth(d){let p=d.split("-");return parseInt(p[0])===curY&&parseInt(p[1])-1===curM}
 function changeMonth(n){curM+=n;if(curM<0){curM=11;curY--}if(curM>11){curM=0;curY++}render();renderBills();renderBars();}
+let _mpYear=null;
+function openMonthPicker(){_mpYear=curY;renderMonthPicker();document.getElementById("monthMask").classList.add("show");}
+function closeMonthPicker(){document.getElementById("monthMask").classList.remove("show");}
+function mpYear(n){_mpYear+=n;renderMonthPicker();}
+function renderMonthPicker(){
+  document.getElementById("mpYearLabel").textContent=_mpYear;
+  const g=document.getElementById("mpGrid");g.innerHTML="";
+  for(let m=0;m<12;m++){
+    const b=document.createElement("button");
+    b.className="mp-cell"+(m===curM&&_mpYear===curY?" cur":"");
+    b.textContent=(m+1)+"月";
+    b.onclick=()=>{curY=_mpYear;curM=m;render();renderBills();renderBars();closeMonthPicker();};
+    g.appendChild(b);
+  }
+}
 function getRecs(){return state.records.filter(r=>inMonth(r.date))}
 let editingId=null,editingType="out";
 function catObj(k){let c=CATS.find(x=>x.k===k);if(c)return c;let cs=state.custom.find(x=>x.k===k);return cs||{n:"其他",ic:"other",c:"#9A9892"}}
@@ -1012,11 +1093,42 @@ function renderTrio(rs,exp){
   document.getElementById("aiTrio").innerHTML=html;
   document.getElementById("aiTrio2").innerHTML=html;
 }
+let billDateFilter=null; // {type:"day",date:"YYYY-MM-DD"} | {type:"month",y,m}
 function renderBills(){
   let bl=document.getElementById("billList");
-  let all=[...state.records].sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id);
+  let kwEl=document.getElementById("billSearch");
+  let kw=(kwEl&&kwEl.value||"").trim();
+  updateDateTag();
+  // —— 日期筛选基础集 ——
+  let base=state.records;
+  if(billDateFilter){
+    if(billDateFilter.type==="day")base=base.filter(r=>r.date===billDateFilter.date);
+    else base=base.filter(r=>{let p=r.date.split("-");return parseInt(p[0])===billDateFilter.y&&parseInt(p[1])===billDateFilter.m;});
+  }
+  // —— 搜索模式 ——
+  if(kw){
+    let kws=kw.toLowerCase().split(/\s+/).filter(Boolean);
+    let hit=base.filter(r=>billMatch(r,kws));
+    document.getElementById("billCount").textContent=hit.length+" 笔";
+    if(!hit.length){
+      let tip=billDateFilter?'（当前已按日期筛选）':'';
+      bl.innerHTML='<div class="list-empty">未找到匹配「<b>'+esc(kw)+'</b>」的账单'+tip+'<br>试试其他关键词，或点 ✕ 查看全部</div>';
+      return;
+    }
+    let ins=hit.filter(r=>r.type==="in"), outs=hit.filter(r=>r.type==="out");
+    let html='<div class="res-summary">找到 '+hit.length+' 条与「'+esc(kw)+'」相关的账单</div>';
+    if(ins.length)html+=resGroup("in",ins,kw);
+    if(outs.length)html+=resGroup("out",outs,kw);
+    bl.innerHTML=html;
+    return;
+  }
+  // —— 普通模式（按日期分组） ——
+  let all=[...base].sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id);
   document.getElementById("billCount").textContent=all.length+" 笔";
-  if(!all.length){bl.innerHTML='<div class="list-empty">暂无记录</div>';return}
+  if(!all.length){
+    bl.innerHTML=billDateFilter?'<div class="list-empty">该日期暂无账单<br>点上方标签 ✕ 可清除日期筛选</div>':'<div class="list-empty">暂无记录</div>';
+    return;
+  }
   let groups={};
   all.forEach(r=>{groups[r.date]=groups[r.date]||[];groups[r.date].push(r)});
   bl.innerHTML=Object.keys(groups).map(dt=>{
@@ -1024,9 +1136,96 @@ function renderBills(){
     return `<div class="bill-day">${dt} <span class="ds">${wd}</span></div>`+
     groups[dt].map(r=>`<div class="rec-row" onclick="openEdit('${r.id}')" style="background:var(--card);border-radius:14px;margin-bottom:6px">
       <div class="rec-ic" style="color:${catObj(r.cat).c}">${catIcon(r.cat)}</div>
-      <div class="rec-mid"><div class="n">${catObj(r.cat).n}</div><div class="t">${r.note||""}</div></div>
+      <div class="rec-mid"><div class="n">${esc(catObj(r.cat).n)}</div><div class="t">${esc(r.note||"")}</div></div>
       <div class="rec-amt ${r.type}">${r.type==="in"?"+":"-"}¥${fmt(r.amt)}</div></div>`).join("");
   }).join("");
+}
+// 日期可检索的各种写法：2026-08-19 / 2026年08月19日 / 8月 / 19日 / 2026年
+function dateHay(d){
+  let p=String(d||"").split("-");if(p.length<3)return String(d||"");
+  let y=p[0],m=p[1],day=p[2];
+  return [d,y+"年"+m+"月"+day+"日",y+"年",m+"月",day+"日",m,day].join(" ");
+}
+function billMatch(r,kws){
+  let hay=[catObj(r.cat).n, r.note||"", r.type==="in"?"收入":"支出", String(r.amt), dateHay(r.date)].join(" ").toLowerCase();
+  return kws.every(k=>hay.indexOf(k)>=0);
+}
+function resGroup(type,list,kw){
+  let sum=list.reduce((s,r)=>s+r.amt,0);
+  let head='<div class="res-head"><div class="rh-l"><span class="dot '+type+'"></span>'+(type==="in"?"收入":"支出")+'</div>'+
+    '<div class="rh-r '+type+'">'+(type==="in"?"+":"-")+"¥"+fmt(sum)+' · '+list.length+' 笔</div></div>';
+  let rows=list.slice().sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id).map(r=>recRowHTML(r,kw)).join("");
+  return '<div class="res-group">'+head+rows+'</div>';
+}
+function recRowHTML(r,kw){
+  return `<div class="rec-row" onclick="openEdit('${r.id}')" style="background:var(--card);border-radius:14px;margin-bottom:6px">
+    <div class="rec-ic" style="color:${catObj(r.cat).c}">${catIcon(r.cat)}</div>
+    <div class="rec-mid"><div class="n">${hl(catObj(r.cat).n,kw)}</div><div class="t">${hl(r.note||"",kw)}</div></div>
+    <div class="rec-amt ${r.type}">${r.type==="in"?"+":"-"}¥${fmt(r.amt)}</div></div>`;
+}
+function hl(txt,kw){
+  let s=String(txt==null?"":txt);
+  if(!kw)return esc(s);
+  let low=s.toLowerCase(),k=kw.toLowerCase(),i=low.indexOf(k);
+  if(i<0)return esc(s);
+  return esc(s.slice(0,i))+'<span class="hl">'+esc(s.slice(i,i+k.length))+'</span>'+esc(s.slice(i+k.length));
+}
+function onBillSearch(){
+  let el=document.getElementById("billSearch");
+  let clr=document.getElementById("bsClear");
+  if(clr)clr.style.display=(el&&el.value)?"grid":"none";
+  renderBills();
+}
+function clearBillSearch(){
+  let el=document.getElementById("billSearch");
+  if(el)el.value="";
+  let clr=document.getElementById("bsClear");
+  if(clr)clr.style.display="none";
+  renderBills();
+  if(el)el.focus();
+}
+// —— 日期选择器 ——
+let dpY,dpM;
+function openDatePicker(){
+  let base=billDateFilter?{y:billDateFilter.y,m:billDateFilter.m}:{y:curY,m:curM+1};
+  dpY=base.y;dpM=base.m-1;
+  openSheet(`<div class="grab"></div><h2>选择日期</h2>
+    <div class="dp-head"><button class="dp-nav" onclick="dpMove(-1)">‹</button><div class="dp-ym" id="dpYM"></div><button class="dp-nav" onclick="dpMove(1)">›</button></div>
+    <div class="dp-week"><div class="dp-dh">日</div><div class="dp-dh">一</div><div class="dp-dh">二</div><div class="dp-dh">三</div><div class="dp-dh">四</div><div class="dp-dh">五</div><div class="dp-dh">六</div></div>
+    <div class="dp-grid" id="dpGrid"></div>
+    <div class="dp-foot">
+      <button class="btn ghost" onclick="dpPickMonth()">只看本月</button>
+      <button class="btn ghost" onclick="clearBillDate()">清除日期</button>
+      <button class="btn ghost" onclick="closeSheet()">取消</button>
+    </div>`);
+  renderDatePicker();
+}
+function dpMove(n){dpM+=n;if(dpM<0){dpM=11;dpY--}if(dpM>11){dpM=0;dpY++}renderDatePicker();}
+function renderDatePicker(){
+  document.getElementById("dpYM").textContent=dpY+"年"+(dpM+1)+"月";
+  let g=document.getElementById("dpGrid");g.innerHTML="";
+  let first=new Date(dpY,dpM,1).getDay();
+  let days=new Date(dpY,dpM+1,0).getDate();
+  let prev=new Date(dpY,dpM,0).getDate();
+  for(let i=0;i<first;i++){let d=document.createElement("div");d.className="dp-d muted";d.textContent=prev-first+i+1;g.appendChild(d)}
+  for(let i=1;i<=days;i++){
+    let d=document.createElement("div");d.className="dp-d";d.textContent=i;
+    let ds=dpY+"-"+String(dpM+1).padStart(2,"0")+"-"+String(i).padStart(2,"0");
+    if(billDateFilter&&billDateFilter.type==="day"&&billDateFilter.date===ds)d.classList.add("sel");
+    if(billDateFilter&&billDateFilter.type==="month"&&billDateFilter.y===dpY&&billDateFilter.m===dpM+1)d.classList.add("selm");
+    d.onclick=()=>{billDateFilter={type:"day",date:ds,y:dpY,m:dpM+1,d:i};closeSheet();renderBills();};
+    g.appendChild(d);
+  }
+}
+function dpPickMonth(){billDateFilter={type:"month",y:dpY,m:dpM+1};closeSheet();renderBills();}
+function clearBillDate(){billDateFilter=null;renderBills();}
+function updateDateTag(){
+  let t=document.getElementById("billDateTag");
+  if(!t)return;
+  if(!billDateFilter){t.style.display="none";t.innerHTML="";return;}
+  let label=billDateFilter.type==="day"?billDateFilter.date:(billDateFilter.y+"年"+billDateFilter.m+"月");
+  t.style.display="flex";
+  t.innerHTML='📅 <b>'+esc(label)+'</b><button onclick="clearBillDate()" title="清除">✕</button>';
 }
 function renderBars(){
   let bc=document.getElementById("barChart");
@@ -1215,33 +1414,47 @@ let _pendingImg=null,ocrBusy=false;
 function onImg(inp){let f=inp.files[0];if(!f)return;let st=document.getElementById("ocrStatus");
   let reader=new FileReader();
   reader.onload=ev=>{let img=new Image();
-    img.onload=()=>{let scale=Math.min(1,1400/img.width);let cv=document.createElement("canvas");cv.width=img.width*scale;cv.height=img.height*scale;
-      cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);let dataUrl=cv.toDataURL("image/jpeg",0.82);_pendingImg=dataUrl;
+    img.onload=()=>{let scale=Math.min(1,1200/img.width);let cv=document.createElement("canvas");cv.width=img.width*scale;cv.height=img.height*scale;
+      cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);let dataUrl=cv.toDataURL("image/jpeg",0.78);_pendingImg=dataUrl;
       st.insertAdjacentHTML("afterbegin",`<img class="img-preview" src="${dataUrl}">`);
       if(aiV.key&&aiV.url)aiVisionOCR(dataUrl,st);else tesseractOCR(dataUrl,st);};
     img.src=ev.target.result;};
   reader.readAsDataURL(f);}
+let _lastOCRImg=null,_lastOCRSt=null;
+function retryAI(){if(_lastOCRImg)aiVisionOCR(_lastOCRImg,_lastOCRSt);}
+function fallbackLocalOCR(){if(_lastOCRImg)tesseractOCR(_lastOCRImg,_lastOCRSt);}
 function aiVisionOCR(dataUrl,st){
+  _lastOCRImg=dataUrl;_lastOCRSt=st;
   st.innerHTML='<span class="spinner"></span>AI 视觉识别中…';
   let b64=dataUrl.split(",")[1];
-  let url=(aiV.url||"").replace(/\/+$/,"")+"/chat/completions";
+  let url=(aiV.url||"").trim().replace(/\/+$/,"")+"/chat/completions";
   let prompt="请识别这张消费账单或小票图片。如果图片中有多条消费或收入记录，请返回一个 JSON 数组，每个元素包含字段：amount(数字,必填,单位元)、type(\"in\"表示收入如工资/退款,\"out\"表示支出,默认out)、cat(类别中文,如餐饮/交通/购物/工资/话费/早餐/午餐/晚餐/奶茶/网购)、date(YYYY-MM-DD,可据票面估算)、note(简短说明,可选)。即使只有一条记录也要返回包含该元素的数组。只返回纯JSON数组,不要任何解释或代码块标记。";
-  let h={"Content-Type":"application/json","Authorization":"Bearer "+aiV.key};if(aiV.token)h["X-Proxy-Token"]=aiV.token;
-  fetch(url,{method:"POST",headers:h,
+  let h={"Content-Type":"application/json","Authorization":"Bearer "+(aiV.key||"").trim()};if((aiV.token||"").trim())h["X-Proxy-Token"]=(aiV.token||"").trim();
+  const ctrl=new AbortController();
+  const to=setTimeout(()=>ctrl.abort(),60000);
+  fetch(url,{method:"POST",headers:h,signal:ctrl.signal,
     body:JSON.stringify({model:aiV.model,messages:[{role:"user",content:[{type:"text",text:prompt},{type:"image_url",image_url:{url:"data:image/jpeg;base64,"+b64}}]}],temperature:0.1})})
-  .then(r=>{if(!r.ok)return r.text().then(t=>{throw new Error("上游HTTP"+r.status+": "+t.slice(0,160))});return r.json()}).then(d=>{
+  .then(r=>{clearTimeout(to);if(!r.ok)return r.text().then(t=>{let err=new Error("上游HTTP"+r.status);err.isHttp=true;st.innerHTML='<b style="color:#e5484d">AI 接口返回错误（HTTP '+r.status+'）：</b>'+String(t).slice(0,200)+'<br><span style="font-size:12px;opacity:.7">多为 模型名 / Key / 额度 问题，请到「AI 视觉识别」核对。不会自动回退。</span>';throw err;});return r.json()}).then(d=>{
     // 千问/豆包 OpenAI 兼容接口在 模型名错/Key无效/额度不足 时，常返回 HTTP 200 + {code,message} 错误体（无 choices）
     if(d&&!(d.choices)&&(d.error||d.code||d.message)){
       let reason=(d.error&&d.error.message)||d.message||("错误码 "+(d.code||""));
-      st.innerHTML='<b style="color:#e5484d">AI 接口返回错误：</b>'+String(reason).slice(0,120)+'<br><span style="font-size:12px;opacity:.7">多为 模型名 / Key / 额度 问题，请到「AI 视觉识别」核对。已停止自动回退。</span>';
+      st.innerHTML='<b style="color:#e5484d">AI 接口返回错误：</b>'+String(reason).slice(0,200)+'<br><span style="font-size:12px;opacity:.7">多为 模型名 / Key / 额度 问题，请到「AI 视觉识别」核对。不会自动回退。</span>';
       return;
     }
     let txt="";try{txt=(d.choices&&d.choices[0]&&d.choices[0].message.content)||"";}catch(e){txt="";}
     let list=parseAIVision(txt);
-    if(!list||!list.length){st.innerHTML="AI 返回了内容但没解析出账单条目，已回退本地 OCR";tesseractOCR(dataUrl,st);return;}
+    if(!list||!list.length){st.innerHTML='AI 返回了内容但没解析出账单条目。<div style="margin-top:6px;font-size:12px;opacity:.7;max-height:130px;overflow:auto;white-space:pre-wrap;word-break:break-all">原始返回：'+(String(txt).slice(0,400))+'</div><div style="margin-top:10px"><button class="btn ghost" onclick="fallbackLocalOCR()">改用本地识别</button></div>';return;}
     if(list.length===1){fillFromOCR(list[0],st);}
     else{showOCRMulti(list,st,_pendingImg);} })
-  .catch(e=>{let msg=(e&&e.message||"").slice(0,140);st.innerHTML="AI 识别失败："+(msg||"网络/接口错误")+"，已回退本地 OCR";tesseractOCR(dataUrl,st);});}
+  .catch(e=>{
+    clearTimeout(to);
+    if(e&&e.name==="AbortError"){
+      st.innerHTML='<b style="color:#e5484d">AI 识别超时</b>：60 秒内未返回结果（可能网络较慢或中转繁忙）。<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="retryAI()">重试 AI 识别</button><button class="btn ghost" onclick="fallbackLocalOCR()">改用本地识别</button></div>';
+      return;
+    }
+    if(e&&e.isHttp)return;
+    let msg=(e&&e.message||"").slice(0,140);st.innerHTML='<b style="color:#e5484d">AI 识别失败：</b>'+(msg||"网络/接口错误")+'<div style="margin-top:10px"><button class="btn ghost" onclick="fallbackLocalOCR()">改用本地识别</button></div>';
+  });}
 function tesseractOCR(dataUrl,st){
   if(window.Tesseract){let _to=false;
     st.innerHTML='<span class="spinner"></span>本地识别中…（首次需联网下载识别模型，请稍候）';
@@ -1276,11 +1489,24 @@ function catNameToKey(name,type){
 }
 let _ocrPendingList=[],_ocrImg=null;
 function parseAIVision(txt){
-  txt=(""+txt).trim().replace(/^```(?:json)?/i,"").replace(/```$/,"").trim();
+  if(!txt)return null;
+  txt=(""+txt).trim();
+  // 去掉 markdown 代码围栏
+  txt=txt.replace(/^```(?:json)?\r?\n/i,"").replace(/\r?\n```\s*$/,"").trim();
+  // 策略1：直接整体解析
+  try{let a=JSON.parse(txt);if(Array.isArray(a)&&a.length)return a;if(a&&typeof a==="object"){if(Array.isArray(a.items))return a.items;if(Array.isArray(a.records))return a.records;if(Array.isArray(a.list))return a.list;return [a];}}catch(e){}
+  // 策略2：提取最外层 [...]
   let am=txt.match(/\[[\s\S]*\]/);
-  if(am){try{let a=JSON.parse(am[0]);if(Array.isArray(a))return a;}catch(e){}}
-  let om=txt.match(/\{[\s\S]*\}/);
-  if(om){try{let o=JSON.parse(om[0]);if(o&&typeof o==="object"){if(Array.isArray(o.items))return o.items;if(Array.isArray(o.records))return o.records;if(Array.isArray(o.list))return o.list;return [o];}}catch(e){}}
+  if(am)try{let a=JSON.parse(am[0]);if(Array.isArray(a)&&a.length)return a;}catch(e){}
+  // 策略3：提取 {...} 包裹的数组字段
+  let om=txt.match(/\{[\s\S]*\]/);
+  if(om)try{let o=JSON.parse(om[0]);if(o&&typeof o==="object"){for(let k of["items","records","list","data","bills","result"]){if(Array.isArray(o[k])&&o[k].length)return o[k];}return [o];}}catch(e){}
+  // 策略4：暴力提取 —— 找到第一个 [ 然后手动配对 ]
+  let si=txt.indexOf("["), ei=txt.lastIndexOf("]");
+  if(si>=0&&ei>si){
+    let sub=txt.substring(si,ei+1);
+    try{let a=JSON.parse(sub);if(Array.isArray(a)&&a.length)return a;}catch(e){}
+  }
   return null;
 }
 function catNameOf(k){let c=CATS.concat(state.custom).find(x=>x.k===k);return c?c.n:k;}
@@ -1332,7 +1558,7 @@ function openAiV(){
   openSheet(`<div class="grab"></div><h2>AI 视觉识别</h2>
    <div class="deck">拍照识别账单 · 支持火山方舟/通义/OpenAI 兼容</div>
    <div class="field-label">接口地址 (Base URL)</div>
-   <input type="text" id="avUrl" value="${aiV.url}" placeholder="https://qwen-proxy.lq269977830.workers.dev/v1">
+   <input type="text" id="avUrl" value="${aiV.url}" placeholder="https://qwen-proxy-csoaxqqpqn.cn-hangzhou.fcapp.run/v1">
    <div class="field-label">API Key</div>
    <input type="password" id="avKey" value="${aiV.key}" placeholder="粘贴你的 key">
    <div class="field-label">模型名（接入点 ID）</div>
@@ -1490,5 +1716,15 @@ function toast(t){let el=document.getElementById("toast");el.textContent=t;el.cl
 applyMode();render();renderBills();renderBars();
 (function(){let s=document.getElementById("avState");if(s)s.textContent=aiV.key?"已开启（AI 优先）":"未配置（用本地OCR）"})();
 </script>
+<div class="modal-mask" id="monthMask" onclick="if(event.target===this)closeMonthPicker()">
+  <div class="month-picker">
+    <div class="mp-head">
+      <button onclick="mpYear(-1)" aria-label="上一年">‹</button>
+      <span id="mpYearLabel">2026</span>
+      <button onclick="mpYear(1)" aria-label="下一年">›</button>
+    </div>
+    <div class="mp-grid" id="mpGrid"></div>
+  </div>
+</div>
 </body>
 </html>
