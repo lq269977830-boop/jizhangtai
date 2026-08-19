@@ -372,7 +372,8 @@ body{padding:0;position:relative;overflow-x:hidden}
 .amt-big::placeholder{color:var(--ink-3);opacity:.5}
 .amt-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px}
 .amt-row .date-pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);background:var(--card);
-  border:1px solid var(--line);border-radius:var(--r-pill);padding:7px 14px;cursor:pointer}
+  border:1px solid var(--line);border-radius:var(--r-pill);padding:7px 14px;cursor:pointer;position:relative;overflow:hidden}
+.date-hidden{position:absolute;inset:0;width:100%;height:100%;opacity:0;border:0;padding:0;margin:0;cursor:pointer}
 .amt-row .date-pill svg{width:13px;height:13px}
 .field-label{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin:18px 0 10px}
 .cats{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
@@ -1284,11 +1285,11 @@ function modalHtml(r){
     </div>
     <input type="number" class="amt-big num" id="amt" placeholder="¥ 0.00" value="${r?r.amt:""}" step="0.01">
     <div class="amt-row">
-      <button class="date-pill" onclick="document.getElementById('dateInp').showPicker&&document.getElementById('dateInp').showPicker()">
+      <div class="date-pill">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>
         <span id="dateLbl">${dParts[0]}年${+dParts[1]}月${+dParts[2]}日</span>
-      </button>
-      <input type="date" id="dateInp" style="position:absolute;opacity:0;pointer-events:none" value="${dateStr}" onchange="updateDateLbl()">
+        <input type="date" id="dateInp" class="date-hidden" value="${dateStr}" onchange="updateDateLbl()">
+      </div>
     </div>
     <div class="field-label">类别</div>
     <div class="cats" id="catGrid">
