@@ -1627,25 +1627,119 @@ function importData(){let i=document.createElement("input");i.type="file";i.acce
 /* ============ AI 助手 ============ */
 const CAT_AVATAR="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAoACgDASIAAhEBAxEB/8QAGwABAAEFAQAAAAAAAAAAAAAAAAYBAwQFBwj/xAAoEAABAwMDBAICAwAAAAAAAAABAgMEAAURBhIhBxMiMRRRMkFhcYH/xAAYAQADAQEAAAAAAAAAAAAAAAAAAgMBBP/EACIRAAEEAgEEAwAAAAAAAAAAAAEAAgMREiEEMUFRkRMUIv/aAAwDAQACEQMRAD8A9l0pShCUrSydVWCMspkXFtsdwN7ik7SonAGcYrYx58GSvZHmxnlY3YQ6lRx98GkZIx4tptZYulk0pSnWpUI6oavhafiiG/LRHceaKzlXkpPrake8k1NnEJcQpCxlKhgj7Fcf1f0Ntc1lDlhuMmLK7vkqY6p5Aa58E/sbeMc/xVGceHkAxyvLQfA977eipTOkDfwLXO7nqVTrEHUcD5zTqN6Cy06VdnnBUojxBweMj0eKvWO8zXLVedXvbX+w2sI3NoQcpSMDxwDjgZ49mpK30MmW9lxxWsJTCHE7HfgxNqyk/olS/WcVlWrpE2q0RLFcr/cW7S6oLVDYhoZWrCvxW4FK4JHOP74pp4+M3j/RikBbkDsG8LvHpvegb33Kh8MkjhKGUa3vV116+9aUw6BSblcenzd4ufC7hJcfaHIw3wkcZOAdpIH0RSpzbocW3wGIMJhDEaO2lpptA4QlIwAP8pU34ZHAUOw8BdTAWtAKv0pSlTJQkD3SlCFTIzSlKEL/2Q==";
 function aiAdv(){
-  // ===== AI 财务分析报告（基于本月全部消费数据） =====
+  openSheet(`<div class="grab"></div><div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+    <div class="avatar-ai"><img src="${CAT_AVATAR}" alt="AI"></div>
+    <div><h2>AI 财务分析</h2><div class="deck">Monthly Report</div></div>
+  </div>
+  <div class="ai-report" id="aiReport"><span class="spinner"></span>AI 分析中…（纯文本模型，几秒出）</div>
+  <div id="aiReportBtns"></div>`);
+  runAIAnalysis();
+}
+// 财务分析专用：用便宜的文本模型，不占视觉模型(qwen-vl-max)额度
+const AI_ANALYSIS_MODEL="qwen-plus";
+function runAIAnalysis(){
+  let st=document.getElementById("aiReport");
+  let btns=document.getElementById("aiReportBtns");
+  if(!st)return;
+  if(!aiV.key||!aiV.url){
+    st.innerHTML='<div style="color:var(--warn)">尚未配置 AI Key，无法生成 AI 分析。</div><div style="margin-top:8px;font-size:13px;opacity:.7">到「我的 → 照片识别设置」填同一个 API Key 即可（不额外花钱）。</div>';
+    if(btns)btns.innerHTML='<button class="btn-pill" onclick="renderLocalAnalysis()">查看本地分析</button><button class="btn-ghost" onclick="closeSheet()">关闭</button>';
+    return;
+  }
+  st.innerHTML='<span class="spinner"></span>AI 分析中…（纯文本模型，几秒出）';
+  let url=(aiV.url||"").trim().replace(/\/+$/,"")+"/chat/completions";
+  let h={"Content-Type":"application/json","Authorization":"Bearer "+(aiV.key||"").trim()};
+  if((aiV.token||"").trim())h["X-Proxy-Token"]=(aiV.token||"").trim();
+  let payload=buildAnalysisPayload();
+  const ctrl=new AbortController();
+  const to=setTimeout(()=>ctrl.abort(),60000);
+  fetch(url,{method:"POST",headers:h,signal:ctrl.signal,
+    body:JSON.stringify({model:AI_ANALYSIS_MODEL,messages:[
+      {role:"system",content:"你是一个贴心的个人财务分析助手。用简洁、口语化、像朋友聊天的语气（中文）做消费分析。不要使用代码块。可用『**重点**』加粗关键词。要针对真实数据给出具体观察和1-2条可行建议。控制在220字以内。"},
+      {role:"user",content:payload}
+    ],temperature:0.7})})
+  .then(r=>{clearTimeout(to);if(!r.ok)return r.text().then(t=>{throw new Error("HTTP"+r.status+": "+t.slice(0,160))});return r.json()})
+  .then(d=>{
+    if(d&&!(d.choices)&&(d.error||d.code||d.message)){throw new Error((d.error&&d.error.message)||d.message||("错误码 "+(d.code||"")));}
+    let txt="";try{txt=(d.choices&&d.choices[0]&&d.choices[0].message.content)||"";}catch(e){txt="";}
+    if(!txt.trim())throw new Error("AI 返回为空");
+    st.innerHTML=formatAnalysis(txt);
+    if(btns)btns.innerHTML='<button class="btn-pill" onclick="runAIAnalysis()">重新分析</button><button class="btn-ghost" onclick="renderLocalAnalysis()">本地分析</button><button class="btn-ghost" onclick="closeSheet()">关闭</button>';
+  })
+  .catch(e=>{
+    clearTimeout(to);
+    if(e&&e.name==="AbortError"){st.innerHTML='<b style="color:#e5484d">AI 分析超时</b>：60 秒内未返回。';}
+    else{st.innerHTML='<b style="color:#e5484d">AI 分析失败：</b>'+esc((e&&e.message)||"网络/接口错误").slice(0,140);}
+    if(btns)btns.innerHTML='<button class="btn-pill" onclick="runAIAnalysis()">重试</button><button class="btn-ghost" onclick="renderLocalAnalysis()">改用本地分析</button><button class="btn-ghost" onclick="closeSheet()">关闭</button>';
+  });
+}
+function buildAnalysisPayload(){
   let rs=state.records;
   let myR=rs.filter(r=>inMonth(r.date));
   let exp=0,inc=0,outBy={};
   myR.forEach(r=>{if(r.type==="out"){exp+=r.amt;outBy[r.cat]=(outBy[r.cat]||0)+r.amt}else{inc+=r.amt}});
   let days=new Date(curY,curM+1,0).getDate();
   let todayN=today.getDate();
-  // 上月同期支出
   let lm=curM===0?11:curM-1,ly=curM===0?curY-1:curY;
   let lastExp=0;rs.forEach(r=>{if(r.type==="out"){let p=r.date.split("-");if(parseInt(p[0])===ly&&parseInt(p[1])-1===lm)lastExp+=r.amt}});
-  // 日均
   let dailyAvg=exp/Math.max(1,todayN);
-  let lastDaily=lastExp/Math.max(1,days);
-  // 月底预测
   let pred=Math.round(dailyAvg*days);
-  // 分类占比
   let outTop=Object.entries(outBy).sort((a,b)=>b[1]-a[1]);
   let outTotal=outTop.reduce((s,x)=>s+x[1],0);
-  // 异常支出（单笔 > 日均2倍 或 > 预算15%）
+  let budget=state.budget.exp||0;
+  let lines=[];
+  lines.push(`【${curY}年${curM+1}月 我的账单数据】`);
+  lines.push(`总笔数 ${myR.length}，支出 ¥${fmt(exp)}，收入 ¥${fmt(inc)}，结余 ¥${fmt(inc-exp)}。`);
+  lines.push(`本月已过 ${todayN} 天，日均支出 ¥${fmt(Math.round(dailyAvg))}，按此速度月底预计 ¥${fmt(pred)}。`);
+  if(budget>0)lines.push(`月度预算 ¥${fmt(budget)}，已用 ${Math.round(exp/budget*100)}%。`);
+  if(lastExp>0)lines.push(`上月同期支出 ¥${fmt(lastExp)}。`);
+  if(outTop.length){
+    let top=outTop.slice(0,5).map(([k,v])=>`${catObj(k).n} ¥${fmt(v)}(${Math.round(v/Math.max(1,outTotal)*100)}%)`).join("、");
+    lines.push(`分类支出 Top：${top}。`);
+  }
+  let sorted=[...myR].sort((a,b)=>b.amt-a.amt).slice(0,20);
+  if(sorted.length){lines.push(`较大支出记录（最多20笔）：`);sorted.forEach(r=>lines.push(`- ${r.date} ${catObj(r.cat).n} ¥${fmt(r.amt)} ${r.note||""}`));}
+  lines.push(``);
+  lines.push(`请基于以上真实数据给我一段个人财务分析（口语化、像朋友聊天，中文，220字内）：1）这个月整体消费感觉如何；2）哪类花得最多、要不要注意；3）一个最实在的省钱/理财小建议。`);
+  return lines.join("\n");
+}
+function formatAnalysis(txt){
+  return txt.split(/\n+/).map(line=>{
+    let s=line.trim();
+    if(!s)return "";
+    s=s.replace(/\*\*(.+?)\*\*/g,"<b>$1</b>");
+    return `<div>${s}</div>`;
+  }).filter(Boolean).join("");
+}
+function renderLocalAnalysis(){
+  let st=document.getElementById("aiReport");
+  let btns=document.getElementById("aiReportBtns");
+  let L=buildLocalReportLines();
+  let html=L.map(x=>`<div>${x}</div>`).join("");
+  if(st){st.innerHTML=html;}
+  else{
+    openSheet(`<div class="grab"></div><div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+      <div class="avatar-ai"><img src="${CAT_AVATAR}" alt="AI"></div>
+      <div><h2>财务分析（本地）</h2><div class="deck">Monthly Report</div></div>
+    </div><div class="ai-report">${html}</div><button class="btn-pill" onclick="runAIAnalysis()">AI 分析</button><button class="btn-ghost" onclick="closeSheet()">关闭</button>`);
+    return;
+  }
+  if(btns)btns.innerHTML='<button class="btn-pill" onclick="runAIAnalysis()">AI 分析</button><button class="btn-ghost" onclick="closeSheet()">关闭</button>';
+}
+function buildLocalReportLines(){
+  let rs=state.records;
+  let myR=rs.filter(r=>inMonth(r.date));
+  let exp=0,inc=0,outBy={};
+  myR.forEach(r=>{if(r.type==="out"){exp+=r.amt;outBy[r.cat]=(outBy[r.cat]||0)+r.amt}else{inc+=r.amt}});
+  let days=new Date(curY,curM+1,0).getDate();
+  let todayN=today.getDate();
+  let lm=curM===0?11:curM-1,ly=curM===0?curY-1:curY;
+  let lastExp=0;rs.forEach(r=>{if(r.type==="out"){let p=r.date.split("-");if(parseInt(p[0])===ly&&parseInt(p[1])-1===lm)lastExp+=r.amt}});
+  let dailyAvg=exp/Math.max(1,todayN);
+  let lastDaily=lastExp/Math.max(1,days);
+  let pred=Math.round(dailyAvg*days);
+  let outTop=Object.entries(outBy).sort((a,b)=>b[1]-a[1]);
+  let outTotal=outTop.reduce((s,x)=>s+x[1],0);
   let budget=state.budget.exp||0;
   let anomalies=myR.filter(r=>r.type==="out"&&(r.amt>dailyAvg*2||(budget>0&&r.amt>budget*0.15))).sort((a,b)=>b.amt-a.amt);
   let L=[];
@@ -1680,13 +1774,7 @@ function aiAdv(){
   if(exp>0&&inc>0){
     L.push(`收支建议：当前储蓄率约 <b>${Math.round((inc-exp)/inc*100)}%</b>，建议目标 ≥20%，可通过减少非必要开支或增加收入来源达成。`);
   }
-  openSheet(`<div class="grab"></div><div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
-    <div class="avatar-ai"><img src="${CAT_AVATAR}" alt="AI"></div>
-    <div><h2>AI 财务分析</h2><div class="deck">Monthly Report</div></div>
-  </div>
-  <div class="ai-report">${L.map(x=>`<div>${x}</div>`).join("")}</div>
-  <button class="btn-pill" onclick="aiAdv()">重新分析</button>
-  <button class="btn-ghost" onclick="closeSheet()">关闭</button>`);
+  return L;
 }
 
 /* ============ 亮 / 暗模式 ============ */
