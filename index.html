@@ -818,7 +818,7 @@ if(!Array.isArray(state.customThemes))state.customThemes=[];
 // 兼容内存遗留的单槽自定义（旧代码 customTheme 只存在内存里）
 if(state.customTheme){state.customThemes.unshift(state.customTheme);state.customTheme=undefined}
 // AI 视觉识别配置（独立于 records，不进导出）
-let aiV={url:localStorage.getItem(KEY+"_avurl")||"https://qwen-proxy-csoaxqqpqn.cn-hangzhou.fcapp.run/v1",key:localStorage.getItem(KEY+"_avkey")||"",model:localStorage.getItem(KEY+"_avmodel")||"qwen-vl-max",token:localStorage.getItem(KEY+"_avtoken")||"",asr:localStorage.getItem(KEY+"_avasr")||"whisper-large-v3"};
+let aiV={url:localStorage.getItem(KEY+"_avurl")||"https://qwen-proxy-csoaxqqpqn.cn-hangzhou.fcapp.run/v1",key:localStorage.getItem(KEY+"_avkey")||"",model:localStorage.getItem(KEY+"_avmodel")||"qwen-vl-max",token:localStorage.getItem(KEY+"_avtoken")||"",asr:localStorage.getItem(KEY+"_avasr")||"qwen3-asr-flash"};
 function saveAiV(){localStorage.setItem(KEY+"_avurl",aiV.url);localStorage.setItem(KEY+"_avkey",aiV.key);localStorage.setItem(KEY+"_avmodel",aiV.model);localStorage.setItem(KEY+"_avtoken",aiV.token);localStorage.setItem(KEY+"_avasr",aiV.asr)}
 function save(){localStorage.setItem(KEY,JSON.stringify(state.records));localStorage.setItem(KEY+"_b",JSON.stringify(state.budget));localStorage.setItem(KEY+"_c",JSON.stringify(state.custom));localStorage.setItem(KEY+"_t",JSON.stringify(state.theme||null));localStorage.setItem(KEY+"_cts",JSON.stringify(state.customThemes||[]))}
 const today=new Date();let curY=today.getFullYear(),curM=today.getMonth();
@@ -1513,7 +1513,7 @@ function finalizeVoice(s){
     handleVoiceText(txt,st);
     finishBusy(s);
   }).catch(err=>{
-    if(st)st.innerHTML='<b style="color:#e5484d">语音转文字失败</b>：'+(err&&err.message||"网络错误")+'（若 HTTP 404=FC 没部署 v5；若 HTTP 400+InvalidArgument=模型名未开通改 paraformer-v2；若含 Invalid zip file=FC 仍是旧版）';
+    if(st)st.innerHTML='<b style="color:#e5484d">语音转文字失败</b>：'+(err&&err.message||"网络错误")+'（若 HTTP 404=FC 没部署 v5；若 HTTP 401/403=Key 无效或额度不足；若含 Invalid zip file=FC 仍是旧版 multipart；若含 Required body invalid=FC 旧版误用 /audio/transcriptions 端点）';
     else toast("语音转文字失败");
     finishBusy(s);
   });
@@ -1552,8 +1552,8 @@ function encodeWav(samples,sr){
 }
 function asrTranscribe(wavBlob,st){
   let baseUrl=(aiV.url||"").trim().replace(/\/+$/,"");
-  // v5 改造：走 _b64 路径，FC 用 JSON 接收 base64 音频，自己用 FormData 构造 multipart 转发给百炼
-  // 原因：FC 框架对浏览器原始 multipart body 做 utf8 化会损坏二进制 → "Invalid zip file"
+  // v5 改造：走 _b64 路径，FC 用 JSON 接收 base64 音频，自行翻译成百炼 chat/completions 的 input_audio data-URI 转发
+  // 原因：百炼 Qwen-ASR 不支持 OpenAI 的 /audio/transcriptions multipart 端点；走 JSON 也杜绝二进制被 FC 框架损坏
   let url=baseUrl+"/audio/transcriptions_b64";
   return new Promise((resolve,reject)=>{
     let reader=new FileReader();
@@ -1565,7 +1565,7 @@ function asrTranscribe(wavBlob,st){
       if((aiV.token||"").trim())h["X-Proxy-Token"]=(aiV.token||"").trim();
       const ctrl=new AbortController();
       const to=setTimeout(()=>ctrl.abort(),120000);
-      fetch(url,{method:"POST",headers:h,body:JSON.stringify({file_b64:b64,model:aiV.asr||"whisper-large-v3"}),signal:ctrl.signal})
+      fetch(url,{method:"POST",headers:h,body:JSON.stringify({file_b64:b64,model:aiV.asr||"qwen3-asr-flash"}),signal:ctrl.signal})
         .then(r=>{clearTimeout(to);return r.text().then(txt=>{
           if(!r.ok){let head=(txt||"").slice(0,160).replace(/\s+/g," ");throw new Error("HTTP "+r.status+(head?" "+head:""));}
           return {status:r.status,txt};
@@ -1764,7 +1764,7 @@ function openAiV(){
    <div class="field-label">模型名（接入点 ID）</div>
    <input type="text" id="avModel" value="${aiV.model}" placeholder="qwen-vl-max">
    <div class="field-label">语音识别模型（按住说话转文字用）</div>
-   <input type="text" id="avAsr" value="${aiV.asr}" placeholder="whisper-large-v3">
+   <input type="text" id="avAsr" value="${aiV.asr}" placeholder="qwen3-asr-flash">
    <div class="field-label">代理令牌（可选 · 你的 Worker 未启用可不填）</div>
    <input type="text" id="avToken" value="${aiV.token}" placeholder="默认留空即可">
    <div class="ocr-status">配置后拍照优先用 AI 识别（准确率高）；语音按住说话会自动转文字；未填 key 则使用本地 OCR。</div>
