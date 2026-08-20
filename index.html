@@ -1710,6 +1710,27 @@ function parseAIVision(txt){
     let sub=txt.substring(si,ei+1);
     try{let a=JSON.parse(sub);if(Array.isArray(a)&&a.length)return a;}catch(e){}
   }
+  // 策略5（新增）：AI 输出超长被截断时，提取数组内所有完整的 {...} 对象
+  // 容忍截断（缺尾部的 ] 和最后一个对象）
+  let si2=txt.indexOf("[");
+  if(si2>=0){
+    let body=txt.substring(si2);
+    let objs=[];
+    let depth=0,start=-1;
+    for(let i=0;i<body.length;i++){
+      let ch=body[i];
+      if(ch==="{"){if(depth===0)start=i;depth++;}
+      else if(ch==="}"){
+        depth--;
+        if(depth===0&&start>=0){
+          let objStr=body.substring(start,i+1);
+          try{let o=JSON.parse(objStr);if(o&&typeof o==="object"&&(o.amount!=null||o.amt!=null))objs.push(o);}catch(e){}
+          start=-1;
+        }
+      }
+    }
+    if(objs.length)return objs;
+  }
   return null;
 }
 function catNameOf(k){let c=CATS.concat(state.custom).find(x=>x.k===k);return c?c.n:k;}
