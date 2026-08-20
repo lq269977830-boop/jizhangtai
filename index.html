@@ -1448,15 +1448,27 @@ function vDown(e,btn){
   e.preventDefault();
   if(!navigator.mediaDevices||!window.MediaRecorder){toast("当前浏览器不支持录音（需 https/localhost），请用粘贴识别");return}
   if(!window.isSecureContext){toast("录音需 https/localhost 环境，请用粘贴识别");return}
+  // 内置浏览器（微信/QQ/支付宝等）即使系统授权了麦克风，网页层也会被拒，直接引导换浏览器
+  let ua=(navigator.userAgent||"");
+  let wv=ua.match(/MicroMessenger/i)?"微信":ua.match(/QQ\/[0-9]/i)?"QQ":ua.match(/AlipayClient/i)?"支付宝":((ua.match(/wv\.[0-9]/i)||/Android [0-9.]+;.*Mobile.*Safari/i.test(ua)&&/; wv/i.test(ua))?"内置浏览器":"");
+  if(wv){toast("当前在"+wv+"内打开，不支持网页录音：请点右上角「···」→「在浏览器打开」，或用 Safari/Chrome 打开链接");return}
   if(voiceSessions.filter(s=>s.status==="rec").length>=4){toast("最多同时录 4 段语音");return}
   if(btn.setPointerCapture)try{btn.setPointerCapture(e.pointerId)}catch(err){}
+  // 兜底：document 监听 pointerup/pointercancel，确保 iOS 无痕模式 setPointerCapture 失效时松开也能停
+  let _onUp=ev=>{if(ev.pointerId===e.pointerId)vUp(ev,btn)};
+  let _onCancel=ev=>{if(ev.pointerId===e.pointerId)vUp(ev,btn)};
+  document.addEventListener("pointerup",_onUp,{once:true,capture:true});
+  document.addEventListener("pointercancel",_onCancel,{once:true,capture:true});
+  s._cleanupPointer=()=>{document.removeEventListener("pointerup",_onUp,{capture:true});document.removeEventListener("pointercancel",_onCancel,{capture:true})};
   navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
     let rec=null;
     try{rec=new MediaRecorder(stream,{mimeType:"audio/webm"})}catch(err1){try{rec=new MediaRecorder(stream)}catch(err2){toast("录音初始化失败");stream.getTracks().forEach(t=>t.stop());return}}
-    let s={id:"v"+Date.now()+Math.random().toString(36).slice(2,7),pointerId:e.pointerId,btn,stream,rec,chunks:[],startTs:Date.now(),timer:null,dur:0,status:"rec"};
+    let s={id:"v"+Date.now()+Math.random().toString(36).slice(2,7),pointerId:e.pointerId,btn,stream,rec,chunks:[],startTs:Date.now(),timer:null,dur:0,status:"rec",_stopFallback:null,_cleanupPointer:null};
     rec.ondataavailable=ev=>{if(ev.data&&ev.data.size)s.chunks.push(ev.data)};
-    rec.onstop=()=>{s.status="done";if(s.timer)clearInterval(s.timer);s.stream.getTracks().forEach(t=>t.stop());updateVoiceBtn();finalizeVoice(s)};
-    try{rec.start(250)}catch(err){s.stream.getTracks().forEach(t=>t.stop());toast("录音启动失败，请重试");return}
+    rec.onstop=()=>{s.status="done";if(s.timer)clearInterval(s.timer);s.stream.getTracks().forEach(t=>t.stop());if(s._stopFallback)clearTimeout(s._stopFallback);if(s._cleanupPointer)s._cleanupPointer();updateVoiceBtn();finalizeVoice(s)};
+    try{rec.start(250)}catch(err){s.stream.getTracks().forEach(t=>t.stop());if(s._cleanupPointer)s._cleanupPointer();toast("录音启动失败，请重试");return}
+    // 兜底：5 秒后 onstop 仍未触发，强制 finalize（iOS 无痕模式偶发 onstop 延迟/丢失）
+    s._stopFallback=setTimeout(()=>{if(s.status==="rec"){try{rec.stop()}catch(err){};if(s.status==="rec"){s.status="done";if(s.timer)clearInterval(s.timer);s.stream.getTracks().forEach(t=>t.stop());if(s._cleanupPointer)s._cleanupPointer();updateVoiceBtn();finalizeVoice(s);}}},5000);
     s.timer=setInterval(()=>{s.dur=(Date.now()-s.startTs)/1000;updateVoiceBtn();if(s.dur>=VOICE_MAX_SEC){try{rec.stop()}catch(err){}}},200);
     voiceSessions.push(s);
     updateVoiceBtn();
@@ -1501,7 +1513,7 @@ function finalizeVoice(s){
     handleVoiceText(txt,st);
     finishBusy(s);
   }).catch(err=>{
-    if(st)st.innerHTML='<b style="color:#e5484d">语音转文字失败</b>：'+(err&&err.message||"网络错误")+'（检查 AI 接口配置；FC 中转需为 v3 版支持 /audio/transcriptions）';
+    if(st)st.innerHTML='<b style="color:#e5484d">语音转文字失败</b>：'+(err&&err.message||"网络错误")+'（若含"Invalid zip file"=FC 中转需为 v4 版；若 HTTP 404=FC 没部署新版；若 HTTP 400+InvalidArgument=模型名未开通，改 paraformer-v2）';
     else toast("语音转文字失败");
     finishBusy(s);
   });
