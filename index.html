@@ -1513,7 +1513,7 @@ function finalizeVoice(s){
     handleVoiceText(txt,st);
     finishBusy(s);
   }).catch(err=>{
-    if(st)st.innerHTML='<b style="color:#e5484d">语音转文字失败</b>：'+(err&&err.message||"网络错误")+'（若含"Invalid zip file"=FC 中转需为 v4 版；若 HTTP 404=FC 没部署新版；若 HTTP 400+InvalidArgument=模型名未开通，改 paraformer-v2）';
+    if(st)st.innerHTML='<b style="color:#e5484d">语音转文字失败</b>：'+(err&&err.message||"网络错误")+'（若 HTTP 404=FC 没部署 v5；若 HTTP 400+InvalidArgument=模型名未开通改 paraformer-v2；若含 Invalid zip file=FC 仍是旧版）';
     else toast("语音转文字失败");
     finishBusy(s);
   });
@@ -1551,20 +1551,31 @@ function encodeWav(samples,sr){
   return buf;
 }
 function asrTranscribe(wavBlob,st){
-  let url=(aiV.url||"").trim().replace(/\/+$/,"")+"/audio/transcriptions";
-  let fd=new FormData();
-  fd.append("file",wavBlob,"voice.wav");
-  fd.append("model",aiV.asr||"whisper-large-v3");
-  let h={};if((aiV.key||"").trim())h["Authorization"]="Bearer "+(aiV.key||"").trim();
-  if((aiV.token||"").trim())h["X-Proxy-Token"]=(aiV.token||"").trim();
-  const ctrl=new AbortController();
-  const to=setTimeout(()=>ctrl.abort(),120000);
-  return fetch(url,{method:"POST",headers:h,body:fd,signal:ctrl.signal})
-    .then(r=>{clearTimeout(to);return r.text().then(txt=>{
-      if(!r.ok){let head=(txt||"").slice(0,160).replace(/\s+/g," ");throw new Error("HTTP "+r.status+(head?" "+head:""));}
-      return {status:r.status,txt};
-    })})
-    .catch(e=>{clearTimeout(to);throw e});
+  let baseUrl=(aiV.url||"").trim().replace(/\/+$/,"");
+  // v5 改造：走 _b64 路径，FC 用 JSON 接收 base64 音频，自己用 FormData 构造 multipart 转发给百炼
+  // 原因：FC 框架对浏览器原始 multipart body 做 utf8 化会损坏二进制 → "Invalid zip file"
+  let url=baseUrl+"/audio/transcriptions_b64";
+  return new Promise((resolve,reject)=>{
+    let reader=new FileReader();
+    reader.onload=()=>{
+      let b64=String(reader.result||"").split(",")[1]||"";
+      if(!b64){reject(new Error("音频读取为空"));return}
+      let h={"Content-Type":"application/json"};
+      if((aiV.key||"").trim())h["Authorization"]="Bearer "+(aiV.key||"").trim();
+      if((aiV.token||"").trim())h["X-Proxy-Token"]=(aiV.token||"").trim();
+      const ctrl=new AbortController();
+      const to=setTimeout(()=>ctrl.abort(),120000);
+      fetch(url,{method:"POST",headers:h,body:JSON.stringify({file_b64:b64,model:aiV.asr||"whisper-large-v3"}),signal:ctrl.signal})
+        .then(r=>{clearTimeout(to);return r.text().then(txt=>{
+          if(!r.ok){let head=(txt||"").slice(0,160).replace(/\s+/g," ");throw new Error("HTTP "+r.status+(head?" "+head:""));}
+          return {status:r.status,txt};
+        })})
+        .catch(e=>{clearTimeout(to);reject(e)});
+    };
+    reader.onerror=()=>reject(new Error("音频读取失败"));
+    reader.readAsDataURL(wavBlob);
+  });
+}
 }
 function parseVoiceItems(t){
   if(!t||!t.trim())return null;
