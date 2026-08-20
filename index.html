@@ -1440,65 +1440,169 @@ function delRec(id){openSheet(`<div class="grab"></div><h2>删除记录</h2><div
   <button class="btn-pill" style="background:var(--warn)" onclick="doDel('${id}')">确认删除</button>
   <button class="btn-ghost" onclick="closeSheet()">取消</button>`)}
 function doDel(id){state.records=state.records.filter(r=>r.id!==id);save();render();renderBills();closeSheet();toast("已删除")}
-/* ============ 语音（Web Speech API 浏览器原生识别：无需录音上传，直接返回文字，Chrome/Safari 原生支持）============ */
-let recog=null,_voiceFlag=false,_finalT="";
+/* ============ 语音：iOS 用 Web Speech API（Apple 服务）；电脑/安卓用 MediaRecorder+百炼 ASR（国内可用）============ */
+let _voiceFlag=false;
+// ---- 统一入口：设备分流 ----
 function startVoice(btn){
-  let SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){toast("浏览器不支持语音识别，请用粘贴识别");return}
   if(!window.isSecureContext){toast("语音需 https/localhost 环境，请用粘贴识别");return}
-  // 内置浏览器（微信/QQ/支付宝等）不支持 SpeechRecognition
   let ua=(navigator.userAgent||"");
   let wv=ua.match(/MicroMessenger/i)?"微信":ua.match(/QQ\/[0-9]/i)?"QQ":ua.match(/AlipayClient/i)?"支付宝":((ua.match(/wv\.[0-9]/i)||/Android [0-9.]+;.*Mobile.*Safari/i.test(ua)&&/; wv/i.test(ua))?"内置浏览器":"");
-  if(wv){toast("当前在"+wv+"内打开，不支持语音识别：请点右上角「···」→「在浏览器打开」，或用 Safari/Chrome 打开链接");return}
-  if(recog&&recog._live){stopVoice();return}
-  // 清理可能残留的已完成/异常会话（避免旧状态干扰新会话，防"一点击就结束"）
-  if(recog){recog._stop=true;if(recog._r)try{recog._r.abort&&recog._r.abort()}catch(e){};recog._live=false;recog=null}
-  // iOS Safari 限制：每次只能识别一小段，且无用户点击时不能自动重启 → iOS 用单句模式（识别到内容立即出结果），其他浏览器用自动续听
+  if(wv){toast("当前在"+wv+"内打开，不支持语音：请点右上角「···」→「在浏览器打开」，或用 Safari/Chrome 打开链接");return}
   const isIOS=/iP(hone|ad|od)/i.test(ua);
-  // 开始新会话
-  _finalT="";
-  recog={_live:true,_stop:false,_done:false,_ios:isIOS,_btn:btn,_r:null};
-  btn.classList.add("live");
-  let sp=btn.querySelector("span");if(sp)sp.textContent=isIOS?"聆听中…(说完自动结束)":"聆听中…(再点停止)";
-  _speechBegin();
+  if(isIOS){
+    let SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!SR){toast("此浏览器不支持语音识别，请用 Safari 打开");return}
+    startVoiceWS(btn);
+  }else{
+    _startMR(btn);  // 电脑/安卓：MediaRecorder + 百炼 ASR（国内可用）
+  }
 }
-// 长录音核心：一段识别结束(停顿)后自动续听（仅非 iOS），直到用户再点停止；所有片段拼接
-function _speechBegin(){
+
+// ============ iOS：Web Speech API（Apple 服务）============
+let recog=null,_finalT="";
+function startVoiceWS(btn){
+  if(recog&&recog._live){stopVoiceWS();return}
+  if(recog){recog._stop=true;if(recog._r)try{recog._r.abort&&recog._r.abort()}catch(e){}recog._live=false;recog=null}
+  _finalT="";
+  recog={_live:true,_stop:false,_done:false,_btn:btn,_r:null};
+  btn.classList.add("live");
+  let sp=btn.querySelector("span");if(sp)sp.textContent="聆听中…(说完自动结束)";
+  _speechBeginWS();
+}
+function _speechBeginWS(){
   if(!recog||!recog._live||recog._stop)return;
   let SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   let r=new SR();
   r.lang="zh-CN";
   r.interimResults=false;
-  r.continuous=false;  // 每段独立，配合 onend 自动重启实现长录音
+  r.continuous=false;
   recog._r=r;
   r.onresult=e=>{
     let got=false;
     for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal){_finalT+=e.results[i][0].transcript;got=true}}
-    // iOS：识别到内容立即结束出结果（iOS 无法续听，等太久反而"太快"体验差）
-    if(got&&recog&&recog._ios&&!recog._done){recog._done=true;stopVoice()}
+    if(got&&recog&&!recog._done){recog._done=true;stopVoiceWS()}
   };
-  r.onerror=e=>{toast("语音："+({"not-allowed":"麦克风被拒绝，请到浏览器设置授权","network":"需联网","no-speech":"没听到声音","audio-capture":"无麦克风"}[e.error]||e.error));
+  r.onerror=e=>{toast("语音："+({"not-allowed":"语音识别未授权：请到 设置→Safari浏览器→语音识别 里允许","network":"需联网，请检查网络","no-speech":"没听到声音，请靠近麦克风再说一次","audio-capture":"无麦克风","language-not-supported":"语言不支持"}[e.error]||e.error));
     if(recog){recog._stop=true;recog._live=false;recog._r=null}
     let b=document.querySelector(".tool.live");if(b){b.classList.remove("live");let sp2=b.querySelector("span");if(sp2)sp2.textContent="语音"}
     recog=null;};
   r.onend=()=>{
-    // 非 iOS：用户没点停止 → 250ms 后自动续听（长录音）
-    if(recog&&recog._live&&!recog._stop&&!recog._ios){setTimeout(()=>_speechBegin(),250);return}
-    // iOS 或用户已点停止：正常结束会话，必须清理状态，否则下次点击会被当成"停止"→"一点击就结束"
-    if(recog&&recog._live&&!recog._done){recog._done=true;stopVoice()}
+    if(recog&&recog._live&&!recog._done){recog._done=true;stopVoiceWS()}
   };
-  try{r.start()}catch(e){toast("无法启动语音识别");stopVoice()}
+  try{r.start()}catch(e){toast("无法启动语音识别");stopVoiceWS()}
 }
-function stopVoice(){
+function stopVoiceWS(){
   if(!recog)return;
   recog._stop=true;
   if(recog._r){try{recog._r.abort&&recog._r.abort()}catch(e){}}
   recog._live=false;
-  let btn=recog._btn;
-  recog=null;
+  let btn=recog._btn;recog=null;
   if(btn){btn.classList.remove("live");let sp=btn.querySelector("span");if(sp)sp.textContent="语音"}
   let t=_finalT.trim();
-  if(t){handleVoiceText(t);toast("已识别")}else{toast("未识别到语音")}
+  if(t){handleVoiceText(t);toast("已识别")}else{toast("未识别到语音，请再试一次")}
+}
+
+// ============ 电脑/安卓：MediaRecorder + 百炼 ASR ============
+let _mr=null,_mrChunks=[],_mrBtn=null;
+function _startMR(btn){
+  if(_mr){_stopMR();return}
+  if(!navigator.mediaDevices||!window.MediaRecorder){toast("当前浏览器不支持录音，请用粘贴识别");return}
+  navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
+    let rec=null;
+    try{rec=new MediaRecorder(stream)}catch(e1){try{rec=new MediaRecorder(stream,{mimeType:"audio/webm"})}catch(e2){toast("录音初始化失败");stream.getTracks().forEach(t=>t.stop());return}}
+    _mrChunks=[];_mr=rec;_mrBtn=btn;
+    btn.classList.add("live");
+    let sp=btn.querySelector("span");if(sp)sp.textContent="录音中…(再点停止)";
+    rec.ondataavailable=e=>{if(e.data&&e.data.size)_mrChunks.push(e.data)};
+    rec.onstop=()=>{
+      stream.getTracks().forEach(t=>t.stop());
+      let b=_mrBtn;if(b){b.classList.remove("live");let sp2=b.querySelector("span");if(sp2)sp2.textContent="语音"}
+      let blob=new Blob(_mrChunks,{type:(rec.mimeType)||"audio/webm"});
+      _mr=null;_mrBtn=null;
+      if(!blob||blob.size<2000){toast("录音太短，已忽略");return}
+      let st=document.getElementById("ocrStatus");
+      if(st)st.innerHTML='<span class="spinner"></span>语音转文字中…';
+      blobToWav16k(blob).then(wav=>asrTranscribe(wav)).then(txt=>{
+        if(st)st.innerHTML="语音已识别 ✔";
+        if(txt&&txt.trim()){handleVoiceText(txt)}else{toast("语音识别无结果")}
+      }).catch(err=>{
+        let msg=(err&&err.message)||"网络错误";
+        if(st)st.innerHTML='<b style="color:#e5484d">语音转文字失败</b>：'+msg;
+        else toast("语音转文字失败："+msg);
+      });
+    };
+    rec.start(250);
+  }).catch(err=>{
+    let n=(err&&err.name)||"";
+    let tip=n==="NotAllowedError"?"未授权：请在浏览器地址栏锁形图标→网站设置→麦克风→选「允许」":"无法访问麦克风（"+n+"）";
+    toast("麦克风："+tip);
+  });
+}
+function _stopMR(){
+  if(_mr){try{if(_mr.state!=="inactive")_mr.stop()}catch(e){}}
+}
+function blobToWav16k(blob){
+  return new Promise((res,rej)=>{
+    let fr=new FileReader();
+    let to=setTimeout(()=>{try{fr.abort()}catch(e){};rej(new Error("音频解码超时（15s），请重试"))},15000);
+    fr.onload=async ev=>{
+      try{
+        let AC=window.AudioContext||window.webkitAudioContext;
+        let ctx=new AC();
+        if(ctx.state==="suspended"){try{await ctx.resume()}catch(e){}}
+        let ab=await ctx.decodeAudioData(ev.target.result);
+        let sr=16000,len=Math.max(1,Math.ceil(ab.duration*sr));
+        let out=ctx.createBuffer(1,len,sr);
+        let o=out.getChannelData(0),src=ab.getChannelData(0);
+        for(let i=0;i<len;i++)o[i]=src[Math.min(src.length-1,Math.floor(i*src.length/len))];
+        let wav=encodeWav(o,sr);
+        if(ctx.close)try{ctx.close()}catch(e){}
+        clearTimeout(to);
+        res(new Blob([wav],{type:"audio/wav"}));
+      }catch(err){clearTimeout(to);rej(err)}
+    };
+    fr.onerror=()=>{clearTimeout(to);rej(new Error("音频读取失败"))};
+    fr.readAsArrayBuffer(blob);
+  });
+}
+function encodeWav(samples,sr){
+  let n=samples.length,buf=new ArrayBuffer(44+n*2),dv=new DataView(buf);
+  let ws=(o,s)=>{for(let i=0;i<s.length;i++)dv.setUint8(o+i,s.charCodeAt(i))};
+  ws(0,"RIFF");dv.setUint32(4,36+n*2,true);ws(8,"WAVE");ws(12,"fmt ");
+  dv.setUint32(16,16,true);dv.setUint16(20,1,true);dv.setUint16(22,1,true);
+  dv.setUint32(24,sr,true);dv.setUint32(28,sr*2,true);dv.setUint16(32,2,true);dv.setUint16(34,16,true);
+  ws(36,"data");dv.setUint32(40,n*2,true);
+  for(let i=0;i<n;i++){let s=Math.max(-1,Math.min(1,samples[i]));dv.setInt16(44+i*2,s<0?s*0x8000:s*0x7FFF,true)}
+  return buf;
+}
+function asrTranscribe(wavBlob){
+  let baseUrl=(aiV.url||"").trim().replace(/\/+$/,"");
+  let url=baseUrl+"/audio/transcriptions_b64";
+  return new Promise((resolve,reject)=>{
+    let reader=new FileReader();
+    reader.onload=()=>{
+      let b64=String(reader.result||"").split(",")[1]||"";
+      if(!b64){reject(new Error("音频读取为空"));return}
+      let h={"Content-Type":"application/json"};
+      if((aiV.key||"").trim())h["Authorization"]="Bearer "+(aiV.key||"").trim();
+      if((aiV.token||"").trim())h["X-Proxy-Token"]=(aiV.token||"").trim();
+      const ctrl=new AbortController();
+      const to=setTimeout(()=>ctrl.abort(),120000);
+      fetch(url,{method:"POST",headers:h,body:JSON.stringify({file_b64:b64,model:aiV.asr||"qwen3-asr-flash"}),signal:ctrl.signal,cache:"no-store"})
+        .then(r=>{clearTimeout(to);return r.text().then(txt=>{
+          if(!r.ok){let head=(txt||"").slice(0,160).replace(/\s+/g," ");throw new Error("HTTP "+r.status+(head?" "+head:""));}
+          return {status:r.status,txt};
+        })})
+        .then(res=>{
+          let txt="";
+          try{let d=JSON.parse(res.txt);txt=(d&&(d.text||(d.output&&d.output.text)))||""}catch(e){txt="";}
+          resolve(txt);
+        })
+        .catch(e=>{clearTimeout(to);reject(e)});
+    };
+    reader.onerror=()=>reject(new Error("音频读取失败"));
+    reader.readAsDataURL(wavBlob);
+  });
 }
 function parseVoiceItems(t){
   if(!t||!t.trim())return null;
