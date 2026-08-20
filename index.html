@@ -1357,7 +1357,7 @@ function modalHtml(r){
     <div class="field-label">备注</div>
     <input type="text" id="note" placeholder="可选" value="${r?r.note:""}">
     <div class="tools">
-      <button class="tool" id="voiceBtn" onpointerdown="vDown(event,this)" onpointerup="vUp(event,this)" onpointercancel="vUp(event,this)">${IC.plus.replace(/<path d="M12 5v14M5 12h14"\/>/,'<path d="M12 14a2 2 0 0 0 2-2V8a2 2 0 0 0-4 0v4a2 2 0 0 0 2 2zM6 10v2a6 6 0 0 0 12 0v-2M12 18v3"/>')}<span>语音</span></button>
+      <button class="tool" id="voiceBtn" style="touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none" ontouchstart="vDown(event,this)" ontouchend="vUp(event,this)" ontouchcancel="vUp(event,this)" onmousedown="vDown(event,this)" onmouseup="vUp(event,this)" onpointerdown="vDown(event,this)" onpointerup="vUp(event,this)" onpointercancel="vUp(event,this)">${IC.plus.replace(/<path d="M12 5v14M5 12h14"\/>/,'<path d="M12 14a2 2 0 0 0 2-2V8a2 2 0 0 0-4 0v4a2 2 0 0 0 2 2zM6 10v2a6 6 0 0 0 12 0v-2M12 18v3"/>')}<span>语音</span></button>
       <button class="tool" onclick="document.getElementById('imgInp').click()">${IC.shop.replace(/<path d="M9 11V6a3 3 0 0 1 6 0v5"\/>/,'<rect x="3" y="5" width="18" height="16" rx="2"/><circle cx="8.5" cy="10" r="1.2"/>')}<span>OCR</span></button>
       <button class="tool" onclick="togglePaste()">${IC.plus.replace(/<path d="M12 5v14M5 12h14"\/>/,'<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>')}<span>粘贴</span></button>
     </div>
@@ -1444,8 +1444,12 @@ function doDel(id){state.records=state.records.filter(r=>r.id!==id);save();rende
 let _voiceFlag=false;
 const VOICE_MAX_SEC=180; // 单段最长 3 分钟，防忘松手
 let voiceSessions=[]; // 每路独立：{id,pointerId,btn,stream,rec,chunks,startTs,timer,dur,status}
+// 兼容 iOS Safari：支持 PointerEvent 的浏览器用 pointer 事件，老 Safari/部分安卓用 touch 事件，桌面用 mouse
+function _evtId(e){if(e&&e.pointerId!==undefined)return e.pointerId;if(e&&e.changedTouches&&e.changedTouches[0])return "t"+e.changedTouches[0].identifier;return "m";}
 function vDown(e,btn){
   e.preventDefault();
+  // 防重复：支持 PointerEvent 时，touchstart 会和 pointerdown 都触发，跳过 touch 版本
+  if(e.type==="touchstart"&&window.PointerEvent)return;
   if(!navigator.mediaDevices||!window.MediaRecorder){toast("当前浏览器不支持录音（需 https/localhost），请用粘贴识别");return}
   if(!window.isSecureContext){toast("录音需 https/localhost 环境，请用粘贴识别");return}
   // 内置浏览器（微信/QQ/支付宝等）即使系统授权了麦克风，网页层也会被拒，直接引导换浏览器
@@ -1453,17 +1457,22 @@ function vDown(e,btn){
   let wv=ua.match(/MicroMessenger/i)?"微信":ua.match(/QQ\/[0-9]/i)?"QQ":ua.match(/AlipayClient/i)?"支付宝":((ua.match(/wv\.[0-9]/i)||/Android [0-9.]+;.*Mobile.*Safari/i.test(ua)&&/; wv/i.test(ua))?"内置浏览器":"");
   if(wv){toast("当前在"+wv+"内打开，不支持网页录音：请点右上角「···」→「在浏览器打开」，或用 Safari/Chrome 打开链接");return}
   if(voiceSessions.filter(s=>s.status==="rec").length>=4){toast("最多同时录 4 段语音");return}
-  if(btn.setPointerCapture)try{btn.setPointerCapture(e.pointerId)}catch(err){}
-  // 兜底：document 监听 pointerup/pointercancel，确保 iOS 无痕模式 setPointerCapture 失效时松开也能停
-  let _onUp=ev=>{if(ev.pointerId===e.pointerId)vUp(ev,btn)};
-  let _onCancel=ev=>{if(ev.pointerId===e.pointerId)vUp(ev,btn)};
+  const pid=_evtId(e);
+  if(btn.setPointerCapture&&e.pointerId!==undefined)try{btn.setPointerCapture(e.pointerId)}catch(err){}
+  // 兜底：document 监听 up/cancel，确保 iOS 无痕模式 setPointerCapture 失效时松开也能停
+  let _onUp=ev=>{if(_evtId(ev)===pid)vUp(ev,btn)};
+  let _onCancel=ev=>{if(_evtId(ev)===pid)vUp(ev,btn)};
   document.addEventListener("pointerup",_onUp,{once:true,capture:true});
   document.addEventListener("pointercancel",_onCancel,{once:true,capture:true});
-  s._cleanupPointer=()=>{document.removeEventListener("pointerup",_onUp,{capture:true});document.removeEventListener("pointercancel",_onCancel,{capture:true})};
+  document.addEventListener("touchend",_onUp,{once:true,capture:true});
+  document.addEventListener("touchcancel",_onCancel,{once:true,capture:true});
+  document.addEventListener("mouseup",_onUp,{once:true,capture:true});
+  // 清理函数（所有监听均为 once，自动移除；这里做兜底清理）
+  const _cleanupPointer=()=>{document.removeEventListener("pointerup",_onUp,{capture:true});document.removeEventListener("pointercancel",_onCancel,{capture:true});document.removeEventListener("touchend",_onUp,{capture:true});document.removeEventListener("touchcancel",_onCancel,{capture:true});document.removeEventListener("mouseup",_onUp,{capture:true})};
   navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
     let rec=null;
     try{rec=new MediaRecorder(stream,{mimeType:"audio/webm"})}catch(err1){try{rec=new MediaRecorder(stream)}catch(err2){toast("录音初始化失败");stream.getTracks().forEach(t=>t.stop());return}}
-    let s={id:"v"+Date.now()+Math.random().toString(36).slice(2,7),pointerId:e.pointerId,btn,stream,rec,chunks:[],startTs:Date.now(),timer:null,dur:0,status:"rec",_stopFallback:null,_cleanupPointer:null};
+    let s={id:"v"+Date.now()+Math.random().toString(36).slice(2,7),pointerId:pid,btn,stream,rec,chunks:[],startTs:Date.now(),timer:null,dur:0,status:"rec",_stopFallback:null,_cleanupPointer};
     rec.ondataavailable=ev=>{if(ev.data&&ev.data.size)s.chunks.push(ev.data)};
     rec.onstop=()=>{s.status="done";if(s.timer)clearInterval(s.timer);s.stream.getTracks().forEach(t=>t.stop());if(s._stopFallback)clearTimeout(s._stopFallback);if(s._cleanupPointer)s._cleanupPointer();updateVoiceBtn();finalizeVoice(s)};
     try{rec.start(250)}catch(err){s.stream.getTracks().forEach(t=>t.stop());if(s._cleanupPointer)s._cleanupPointer();toast("录音启动失败，请重试");return}
@@ -1484,7 +1493,8 @@ function vDown(e,btn){
 }
 function vUp(e,btn){
   e.preventDefault();
-  let s=voiceSessions.find(x=>x.pointerId===e.pointerId&&x.status==="rec");
+  let pid=_evtId(e);
+  let s=voiceSessions.find(x=>x.pointerId===pid&&x.status==="rec");
   if(s&&s.rec&&s.rec.state!=="inactive"){try{s.rec.stop()}catch(err){}}
 }
 function updateVoiceBtn(){
@@ -1508,7 +1518,7 @@ function finalizeVoice(s){
   blobToWav16k(blob).then(wav=>asrTranscribe(wav,st)).then(res=>{
     let txt="";
     try{let d=JSON.parse(res.txt);txt=(d&&(d.text||(d.output&&d.output.text)))||""}catch(e){txt="";}
-    if(!txt){if(st)st.innerHTML='<b style="color:#e5484d">语音识别无结果</b>：音频太短/不清晰，或模型未开通（默认 whisper-large-v3，可在「AI 视觉识别」改）。';else toast("语音识别无结果");finishBusy(s);return}
+    if(!txt){if(st)st.innerHTML='<b style="color:#e5484d">语音识别无结果</b>：音频太短/不清晰，或模型未开通（默认 qwen3-asr-flash，可在「AI 视觉识别」改）。';else toast("语音识别无结果");finishBusy(s);return}
     if(st)st.innerHTML="语音已识别 ✔";
     handleVoiceText(txt,st);
     finishBusy(s);
@@ -1565,7 +1575,7 @@ function asrTranscribe(wavBlob,st){
       if((aiV.token||"").trim())h["X-Proxy-Token"]=(aiV.token||"").trim();
       const ctrl=new AbortController();
       const to=setTimeout(()=>ctrl.abort(),120000);
-      fetch(url,{method:"POST",headers:h,body:JSON.stringify({file_b64:b64,model:aiV.asr||"qwen3-asr-flash"}),signal:ctrl.signal})
+      fetch(url,{method:"POST",headers:h,body:JSON.stringify({file_b64:b64,model:aiV.asr||"qwen3-asr-flash"}),signal:ctrl.signal,cache:"no-store"})
         .then(r=>{clearTimeout(to);return r.text().then(txt=>{
           if(!r.ok){let head=(txt||"").slice(0,160).replace(/\s+/g," ");throw new Error("HTTP "+r.status+(head?" "+head:""));}
           return {status:r.status,txt};
@@ -1635,7 +1645,7 @@ function aiVisionOCR(dataUrl,st){
   let h={"Content-Type":"application/json","Authorization":"Bearer "+(aiV.key||"").trim()};if((aiV.token||"").trim())h["X-Proxy-Token"]=(aiV.token||"").trim();
   const ctrl=new AbortController();
   const to=setTimeout(()=>ctrl.abort(),60000);
-  fetch(url,{method:"POST",headers:h,signal:ctrl.signal,
+  fetch(url,{method:"POST",headers:h,signal:ctrl.signal,cache:"no-store",
     body:JSON.stringify({model:aiV.model,messages:[{role:"user",content:[{type:"text",text:prompt},{type:"image_url",image_url:{url:"data:image/jpeg;base64,"+b64}}]}],temperature:0.1})})
   .then(r=>{clearTimeout(to);if(!r.ok)return r.text().then(t=>{let err=new Error("上游HTTP"+r.status);err.isHttp=true;st.innerHTML='<b style="color:#e5484d">AI 接口返回错误（HTTP '+r.status+'）：</b>'+String(t).slice(0,200)+'<br><span style="font-size:12px;opacity:.7">多为 模型名 / Key / 额度 问题，请到「AI 视觉识别」核对。不会自动回退。</span>';throw err;});return r.json()}).then(d=>{
     // 千问/豆包 OpenAI 兼容接口在 模型名错/Key无效/额度不足 时，常返回 HTTP 200 + {code,message} 错误体（无 choices）
@@ -1702,7 +1712,7 @@ function parseAIVision(txt){
   let am=txt.match(/\[[\s\S]*\]/);
   if(am)try{let a=JSON.parse(am[0]);if(Array.isArray(a)&&a.length)return a;}catch(e){}
   // 策略3：提取 {...} 包裹的数组字段
-  let om=txt.match(/\{[\s\S]*\]/);
+  let om=txt.match(/\{[\s\S]*\}/);
   if(om)try{let o=JSON.parse(om[0]);if(o&&typeof o==="object"){for(let k of["items","records","list","data","bills","result"]){if(Array.isArray(o[k])&&o[k].length)return o[k];}return [o];}}catch(e){}
   // 策略4：暴力提取 —— 找到第一个 [ 然后手动配对 ]
   let si=txt.indexOf("["), ei=txt.lastIndexOf("]");
