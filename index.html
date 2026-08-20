@@ -1532,10 +1532,15 @@ function finishBusy(s){voiceSessions=voiceSessions.filter(x=>x.id!==s.id);update
 function blobToWav16k(blob){
   return new Promise((res,rej)=>{
     let fr=new FileReader();
+    // 超时保护：15 秒内解码+重采样没完成就报错，避免无限转圈
+    let to=setTimeout(()=>{try{fr.abort()}catch(err){};rej(new Error("音频解码超时（15s），请重试或换短一点的录音"))},15000);
     fr.onload=async ev=>{
       try{
         let AC=window.AudioContext||window.webkitAudioContext;
         let ctx=new AC();
+        // iOS Safari 坑：录音停止后的异步回调里 AudioContext 常处于 suspended，
+        // 直接 decodeAudioData 会永远挂起（卡在"上传音频"转圈）→ 先 resume
+        if(ctx.state==="suspended"){try{await ctx.resume()}catch(err){}}
         let ab=await ctx.decodeAudioData(ev.target.result);
         let sr=16000,len=Math.max(1,Math.ceil(ab.duration*sr));
         let out=ctx.createBuffer(1,len,sr);
@@ -1543,10 +1548,11 @@ function blobToWav16k(blob){
         for(let i=0;i<len;i++)o[i]=src[Math.min(src.length-1,Math.floor(i*src.length/len))];
         let wav=encodeWav(o,sr);
         if(ctx.close)try{ctx.close()}catch(err){}
+        clearTimeout(to);
         res(new Blob([wav],{type:"audio/wav"}));
-      }catch(err){rej(err)}
+      }catch(err){clearTimeout(to);rej(err)}
     };
-    fr.onerror=rej;
+    fr.onerror=()=>{clearTimeout(to);rej(new Error("音频读取失败"))};
     fr.readAsArrayBuffer(blob);
   });
 }
