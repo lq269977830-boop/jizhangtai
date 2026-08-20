@@ -1593,7 +1593,10 @@ function parseVoiceItems(t){
 }
 function handleVoiceText(t,st){
   let items=parseVoiceItems(t);
+  // ASR(qwen3-asr-flash)可能返回JSON数组格式，fallback用parseAIVision解析
+  if(!items||!items.length){try{let _t=(""+t).trim().replace(/^```(?:json)?\r?\n/i,"").replace(/\r?\n```\s*$/,"").trim();let _a=JSON.parse(_t);if(Array.isArray(_a)&&_a.length)items=_a;}catch(e){}}
   if(items&&items.length>1){showOCRMulti(items,st,null);return;}
+  if(items&&items.length===1){fillFromOCR(items[0],st);return;}
   applyVoice(t);toast("已识别填入，请核对后保存");
 }
 function applyVoice(t){
