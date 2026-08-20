@@ -1576,7 +1576,6 @@ function asrTranscribe(wavBlob,st){
     reader.readAsDataURL(wavBlob);
   });
 }
-}
 function parseVoiceItems(t){
   if(!t||!t.trim())return null;
   let segs=String(t).split(/[，,。；;！!？?\n/、]|然后|还有|以及|and/).map(s=>s.trim()).filter(Boolean);
