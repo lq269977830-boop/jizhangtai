@@ -1357,7 +1357,7 @@ function modalHtml(r){
     <div class="field-label">备注</div>
     <input type="text" id="note" placeholder="可选" value="${r?r.note:""}">
     <div class="tools">
-      <button class="tool" id="voiceBtn" style="touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none" ontouchstart="vDown(event,this)" ontouchend="vUp(event,this)" ontouchcancel="vUp(event,this)" onmousedown="vDown(event,this)" onmouseup="vUp(event,this)" onpointerdown="vDown(event,this)" onpointerup="vUp(event,this)" onpointercancel="vUp(event,this)">${IC.plus.replace(/<path d="M12 5v14M5 12h14"\/>/,'<path d="M12 14a2 2 0 0 0 2-2V8a2 2 0 0 0-4 0v4a2 2 0 0 0 2 2zM6 10v2a6 6 0 0 0 12 0v-2M12 18v3"/>')}<span>语音</span></button>
+      <button class="tool" id="voiceBtn" onclick="startVoice(this)">${IC.plus.replace(/<path d="M12 5v14M5 12h14"\/>/,'<path d="M12 14a2 2 0 0 0 2-2V8a2 2 0 0 0-4 0v4a2 2 0 0 0 2 2zM6 10v2a6 6 0 0 0 12 0v-2M12 18v3"/>')}<span>语音</span></button>
       <button class="tool" onclick="document.getElementById('imgInp').click()">${IC.shop.replace(/<path d="M9 11V6a3 3 0 0 1 6 0v5"\/>/,'<rect x="3" y="5" width="18" height="16" rx="2"/><circle cx="8.5" cy="10" r="1.2"/>')}<span>OCR</span></button>
       <button class="tool" onclick="togglePaste()">${IC.plus.replace(/<path d="M12 5v14M5 12h14"\/>/,'<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>')}<span>粘贴</span></button>
     </div>
@@ -1440,158 +1440,35 @@ function delRec(id){openSheet(`<div class="grab"></div><h2>删除记录</h2><div
   <button class="btn-pill" style="background:var(--warn)" onclick="doDel('${id}')">确认删除</button>
   <button class="btn-ghost" onclick="closeSheet()">取消</button>`)}
 function doDel(id){state.records=state.records.filter(r=>r.id!==id);save();render();renderBills();closeSheet();toast("已删除")}
-/* ============ 语音（按住录音、松开停止 · 多路并发 · 长时长 180s）============ */
-let _voiceFlag=false;
-const VOICE_MAX_SEC=180; // 单段最长 3 分钟，防忘松手
-let voiceSessions=[]; // 每路独立：{id,pointerId,btn,stream,rec,chunks,startTs,timer,dur,status}
-// 兼容 iOS Safari：支持 PointerEvent 的浏览器用 pointer 事件，老 Safari/部分安卓用 touch 事件，桌面用 mouse
-function _evtId(e){if(e&&e.pointerId!==undefined)return e.pointerId;if(e&&e.changedTouches&&e.changedTouches[0])return "t"+e.changedTouches[0].identifier;return "m";}
-function vDown(e,btn){
-  e.preventDefault();
-  // 防重复：支持 PointerEvent 时，touchstart 会和 pointerdown 都触发，跳过 touch 版本
-  if(e.type==="touchstart"&&window.PointerEvent)return;
-  if(!navigator.mediaDevices||!window.MediaRecorder){toast("当前浏览器不支持录音（需 https/localhost），请用粘贴识别");return}
-  if(!window.isSecureContext){toast("录音需 https/localhost 环境，请用粘贴识别");return}
-  // 内置浏览器（微信/QQ/支付宝等）即使系统授权了麦克风，网页层也会被拒，直接引导换浏览器
+/* ============ 语音（Web Speech API 浏览器原生识别：无需录音上传，直接返回文字，Chrome/Safari 原生支持）============ */
+let recog=null,_voiceFlag=false;
+function startVoice(btn){
+  let SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){toast("浏览器不支持语音识别，请用粘贴识别");return}
+  if(!window.isSecureContext){toast("语音需 https/localhost 环境，请用粘贴识别");return}
+  // 内置浏览器（微信/QQ/支付宝等）不支持 SpeechRecognition
   let ua=(navigator.userAgent||"");
   let wv=ua.match(/MicroMessenger/i)?"微信":ua.match(/QQ\/[0-9]/i)?"QQ":ua.match(/AlipayClient/i)?"支付宝":((ua.match(/wv\.[0-9]/i)||/Android [0-9.]+;.*Mobile.*Safari/i.test(ua)&&/; wv/i.test(ua))?"内置浏览器":"");
-  if(wv){toast("当前在"+wv+"内打开，不支持网页录音：请点右上角「···」→「在浏览器打开」，或用 Safari/Chrome 打开链接");return}
-  if(voiceSessions.filter(s=>s.status==="rec").length>=4){toast("最多同时录 4 段语音");return}
-  const pid=_evtId(e);
-  if(btn.setPointerCapture&&e.pointerId!==undefined)try{btn.setPointerCapture(e.pointerId)}catch(err){}
-  // 兜底：document 监听 up/cancel，确保 iOS 无痕模式 setPointerCapture 失效时松开也能停
-  let _onUp=ev=>{if(_evtId(ev)===pid)vUp(ev,btn)};
-  let _onCancel=ev=>{if(_evtId(ev)===pid)vUp(ev,btn)};
-  document.addEventListener("pointerup",_onUp,{once:true,capture:true});
-  document.addEventListener("pointercancel",_onCancel,{once:true,capture:true});
-  document.addEventListener("touchend",_onUp,{once:true,capture:true});
-  document.addEventListener("touchcancel",_onCancel,{once:true,capture:true});
-  document.addEventListener("mouseup",_onUp,{once:true,capture:true});
-  // 清理函数（所有监听均为 once，自动移除；这里做兜底清理）
-  const _cleanupPointer=()=>{document.removeEventListener("pointerup",_onUp,{capture:true});document.removeEventListener("pointercancel",_onCancel,{capture:true});document.removeEventListener("touchend",_onUp,{capture:true});document.removeEventListener("touchcancel",_onCancel,{capture:true});document.removeEventListener("mouseup",_onUp,{capture:true})};
-  navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
-    let rec=null;
-    try{rec=new MediaRecorder(stream,{mimeType:"audio/webm"})}catch(err1){try{rec=new MediaRecorder(stream)}catch(err2){toast("录音初始化失败");stream.getTracks().forEach(t=>t.stop());return}}
-    let s={id:"v"+Date.now()+Math.random().toString(36).slice(2,7),pointerId:pid,btn,stream,rec,chunks:[],startTs:Date.now(),timer:null,dur:0,status:"rec",_stopFallback:null,_cleanupPointer};
-    rec.ondataavailable=ev=>{if(ev.data&&ev.data.size)s.chunks.push(ev.data)};
-    rec.onstop=()=>{s.status="done";if(s.timer)clearInterval(s.timer);s.stream.getTracks().forEach(t=>t.stop());if(s._stopFallback)clearTimeout(s._stopFallback);if(s._cleanupPointer)s._cleanupPointer();updateVoiceBtn();finalizeVoice(s)};
-    try{rec.start(250)}catch(err){s.stream.getTracks().forEach(t=>t.stop());if(s._cleanupPointer)s._cleanupPointer();toast("录音启动失败，请重试");return}
-    // 兜底：5 秒后 onstop 仍未触发，强制 finalize（iOS 无痕模式偶发 onstop 延迟/丢失）
-    s._stopFallback=setTimeout(()=>{if(s.status==="rec"){try{rec.stop()}catch(err){};if(s.status==="rec"){s.status="done";if(s.timer)clearInterval(s.timer);s.stream.getTracks().forEach(t=>t.stop());if(s._cleanupPointer)s._cleanupPointer();updateVoiceBtn();finalizeVoice(s);}}},5000);
-    s.timer=setInterval(()=>{s.dur=(Date.now()-s.startTs)/1000;updateVoiceBtn();if(s.dur>=VOICE_MAX_SEC){try{rec.stop()}catch(err){}}},200);
-    voiceSessions.push(s);
-    updateVoiceBtn();
-    toast("录音中… 松开停止");
-  }).catch(err=>{
-    let n=(err&&err.name)||"";
-    let tip=n==="NotAllowedError"?"未授权：请在浏览器地址栏锁形图标→网站设置→麦克风→选「允许」；若在微信/QQ内打开不支持录音，请改用系统浏览器(Safari/Chrome)打开"
-      :n==="NotFoundError"?"未检测到麦克风设备，请检查耳机/麦克风"
-      :n==="NotReadableError"?"麦克风被其他应用占用，关闭后再试"
-      :"无法访问麦克风（"+n+"）";
-    toast("麦克风："+tip);
-  });
+  if(wv){toast("当前在"+wv+"内打开，不支持语音识别：请点右上角「···」→「在浏览器打开」，或用 Safari/Chrome 打开链接");return}
+  if(recog&&recog._live){stopVoice();return}
+  try{
+    recog=new SR();
+    recog.lang="zh-CN";
+    recog.interimResults=false;
+    recog.continuous=true;  // 长录音：持续听到用户再点一次停止；iOS Safari 不支持时自动在停顿后结束
+    recog._live=true;
+    btn.classList.add("live");
+    let sp=btn.querySelector("span");if(sp)sp.textContent="聆听中…(再点停止)";
+    let finalT="";
+    recog.onresult=e=>{for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal)finalT+=e.results[i][0].transcript}};
+    recog.onerror=e=>{toast("语音："+({"not-allowed":"麦克风被拒绝，请到浏览器设置授权","network":"需联网","no-speech":"没听到声音","audio-capture":"无麦克风"}[e.error]||e.error));stopVoice()};
+    recog.onend=()=>{let sp2=btn.querySelector("span");if(sp2)sp2.textContent="语音";
+      if(finalT.trim()){handleVoiceText(finalT.trim());toast("已识别")}else{toast("未识别到语音")}stopVoice()};
+    recog.start();
+  }catch(e){stopVoice();toast("无法启动语音识别")}
 }
-function vUp(e,btn){
-  e.preventDefault();
-  let pid=_evtId(e);
-  let s=voiceSessions.find(x=>x.pointerId===pid&&x.status==="rec");
-  if(s&&s.rec&&s.rec.state!=="inactive"){try{s.rec.stop()}catch(err){}}
-}
-function updateVoiceBtn(){
-  let btn=document.getElementById("voiceBtn");if(!btn)return;
-  let span=btn.querySelector("span");if(!span)return;
-  let recList=voiceSessions.filter(s=>s.status==="rec");
-  if(recList.length){btn.classList.add("live");
-    let max=Math.max(...recList.map(s=>s.dur));
-    span.textContent=recList.length>1?("语音 ×"+recList.length+" "+max.toFixed(1)+"s"):("录音中 "+max.toFixed(1)+"s");
-  }else{btn.classList.remove("live");
-    span.textContent=voiceSessions.some(s=>s.status==="busy")?"转文字…":"语音";}
-}
-function finalizeVoice(s){
-  let blob=new Blob(s.chunks,{type:(s.rec&&s.rec.mimeType)||"audio/webm"});
-  voiceSessions=voiceSessions.filter(x=>x.id!==s.id);
-  updateVoiceBtn();
-  if(!blob||blob.size<2000){toast("录音太短，已忽略");return}
-  s.status="busy";voiceSessions.push(s);updateVoiceBtn();
-  let st=document.getElementById("ocrStatus");
-  if(st)st.innerHTML='<span class="spinner"></span>语音转文字中…（上传音频）';
-  blobToWav16k(blob).then(wav=>asrTranscribe(wav,st)).then(res=>{
-    let txt="";
-    try{let d=JSON.parse(res.txt);txt=(d&&(d.text||(d.output&&d.output.text)))||""}catch(e){txt="";}
-    if(!txt){if(st)st.innerHTML='<b style="color:#e5484d">语音识别无结果</b>：音频太短/不清晰，或模型未开通（默认 qwen3-asr-flash，可在「AI 视觉识别」改）。';else toast("语音识别无结果");finishBusy(s);return}
-    if(st)st.innerHTML="语音已识别 ✔";
-    handleVoiceText(txt,st);
-    finishBusy(s);
-  }).catch(err=>{
-    if(st)st.innerHTML='<b style="color:#e5484d">语音转文字失败</b>：'+(err&&err.message||"网络错误")+'（若 HTTP 404=FC 没部署 v5；若 HTTP 401/403=Key 无效或额度不足；若含 Invalid zip file=FC 仍是旧版 multipart；若含 Required body invalid=FC 旧版误用 /audio/transcriptions 端点）';
-    else toast("语音转文字失败");
-    finishBusy(s);
-  });
-}
-function finishBusy(s){voiceSessions=voiceSessions.filter(x=>x.id!==s.id);updateVoiceBtn()}
-function blobToWav16k(blob){
-  return new Promise((res,rej)=>{
-    let fr=new FileReader();
-    // 超时保护：15 秒内解码+重采样没完成就报错，避免无限转圈
-    let to=setTimeout(()=>{try{fr.abort()}catch(err){};rej(new Error("音频解码超时（15s），请重试或换短一点的录音"))},15000);
-    fr.onload=async ev=>{
-      try{
-        let AC=window.AudioContext||window.webkitAudioContext;
-        let ctx=new AC();
-        // iOS Safari 坑：录音停止后的异步回调里 AudioContext 常处于 suspended，
-        // 直接 decodeAudioData 会永远挂起（卡在"上传音频"转圈）→ 先 resume
-        if(ctx.state==="suspended"){try{await ctx.resume()}catch(err){}}
-        let ab=await ctx.decodeAudioData(ev.target.result);
-        let sr=16000,len=Math.max(1,Math.ceil(ab.duration*sr));
-        let out=ctx.createBuffer(1,len,sr);
-        let o=out.getChannelData(0),src=ab.getChannelData(0);
-        for(let i=0;i<len;i++)o[i]=src[Math.min(src.length-1,Math.floor(i*src.length/len))];
-        let wav=encodeWav(o,sr);
-        if(ctx.close)try{ctx.close()}catch(err){}
-        clearTimeout(to);
-        res(new Blob([wav],{type:"audio/wav"}));
-      }catch(err){clearTimeout(to);rej(err)}
-    };
-    fr.onerror=()=>{clearTimeout(to);rej(new Error("音频读取失败"))};
-    fr.readAsArrayBuffer(blob);
-  });
-}
-function encodeWav(samples,sr){
-  let n=samples.length,buf=new ArrayBuffer(44+n*2),dv=new DataView(buf);
-  let ws=(o,s)=>{for(let i=0;i<s.length;i++)dv.setUint8(o+i,s.charCodeAt(i))};
-  ws(0,"RIFF");dv.setUint32(4,36+n*2,true);ws(8,"WAVE");ws(12,"fmt ");
-  dv.setUint32(16,16,true);dv.setUint16(20,1,true);dv.setUint16(22,1,true);
-  dv.setUint32(24,sr,true);dv.setUint32(28,sr*2,true);dv.setUint16(32,2,true);dv.setUint16(34,16,true);
-  ws(36,"data");dv.setUint32(40,n*2,true);
-  for(let i=0;i<n;i++){let s=Math.max(-1,Math.min(1,samples[i]));dv.setInt16(44+i*2,s<0?s*0x8000:s*0x7FFF,true)}
-  return buf;
-}
-function asrTranscribe(wavBlob,st){
-  let baseUrl=(aiV.url||"").trim().replace(/\/+$/,"");
-  // v5 改造：走 _b64 路径，FC 用 JSON 接收 base64 音频，自行翻译成百炼 chat/completions 的 input_audio data-URI 转发
-  // 原因：百炼 Qwen-ASR 不支持 OpenAI 的 /audio/transcriptions multipart 端点；走 JSON 也杜绝二进制被 FC 框架损坏
-  let url=baseUrl+"/audio/transcriptions_b64";
-  return new Promise((resolve,reject)=>{
-    let reader=new FileReader();
-    reader.onload=()=>{
-      let b64=String(reader.result||"").split(",")[1]||"";
-      if(!b64){reject(new Error("音频读取为空"));return}
-      let h={"Content-Type":"application/json"};
-      if((aiV.key||"").trim())h["Authorization"]="Bearer "+(aiV.key||"").trim();
-      if((aiV.token||"").trim())h["X-Proxy-Token"]=(aiV.token||"").trim();
-      const ctrl=new AbortController();
-      const to=setTimeout(()=>ctrl.abort(),120000);
-      fetch(url,{method:"POST",headers:h,body:JSON.stringify({file_b64:b64,model:aiV.asr||"qwen3-asr-flash"}),signal:ctrl.signal,cache:"no-store"})
-        .then(r=>{clearTimeout(to);return r.text().then(txt=>{
-          if(!r.ok){let head=(txt||"").slice(0,160).replace(/\s+/g," ");throw new Error("HTTP "+r.status+(head?" "+head:""));}
-          return {status:r.status,txt};
-        })})
-        .catch(e=>{clearTimeout(to);reject(e)});
-    };
-    reader.onerror=()=>reject(new Error("音频读取失败"));
-    reader.readAsDataURL(wavBlob);
-  });
-}
+function stopVoice(){if(recog){try{recog.abort&&recog.abort()}catch(e){}recog._live=false;recog=null}
+  let b=document.querySelector(".tool.live");if(b){b.classList.remove("live");let sp=b.querySelector("span");if(sp)sp.textContent="语音"}}
 function parseVoiceItems(t){
   if(!t||!t.trim())return null;
   let segs=String(t).split(/[，,。；;！!？?\n/、]|然后|还有|以及|and/).map(s=>s.trim()).filter(Boolean);
