@@ -1482,7 +1482,21 @@ function _speechBeginWS(){
     for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal){_finalT+=e.results[i][0].transcript;got=true}}
     if(got&&recog&&!recog._done){recog._done=true;stopVoiceWS()}
   };
-  r.onerror=e=>{toast("语音："+({"not-allowed":"语音识别未授权：请到 设置→Safari浏览器→语音识别 里允许","network":"需联网，请检查网络","no-speech":"没听到声音，请靠近麦克风再说一次","audio-capture":"无麦克风","language-not-supported":"语言不支持"}[e.error]||e.error));
+  r.onerror=e=>{
+    const eMap={"not-allowed":"语音识别未授权：请到 设置→Safari浏览器→语音识别 里允许","network":"需联网，请检查网络","no-speech":"没听到声音，请靠近麦克风再说一次","audio-capture":"无麦克风","language-not-supported":"语言不支持","aborted":"iOS 识别被打断，请再点一次按钮重试"};
+    const msg=eMap[e.error]||e.error;
+    // iOS Safari 上 "aborted" 经常在 start() 后立即触发（系统短暂打断），自动重试一次
+    if(e.error==="aborted"&&recog&&recog._live&&!recog._stop&&!recog._aborted){
+      recog._aborted=true;
+      try{recog._r&&recog._r.start()}catch(e2){
+        toast("语音："+msg);
+        if(recog){recog._stop=true;recog._live=false;recog._r=null}
+        let b=document.querySelector(".tool.live");if(b){b.classList.remove("live");let sp2=b.querySelector("span");if(sp2)sp2.textContent="语音"}
+        recog=null;
+      }
+      return;
+    }
+    toast("语音："+msg);
     if(recog){recog._stop=true;recog._live=false;recog._r=null}
     let b=document.querySelector(".tool.live");if(b){b.classList.remove("live");let sp2=b.querySelector("span");if(sp2)sp2.textContent="语音"}
     recog=null;};
