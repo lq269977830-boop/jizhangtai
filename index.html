@@ -319,6 +319,15 @@ body{padding:0;position:relative;overflow-x:hidden}
   padding:18px 2px 8px;display:flex;align-items:center;gap:10px}
 .bill-day::after{content:"";flex:1;height:1px;background:var(--line)}
 .bill-day .ds{font-size:11px;color:var(--ink-2);letter-spacing:0;text-transform:none;font-weight:400}
+/* 每日收支合计 chips */
+.bill-day .bill-day-sum{margin-left:auto;display:flex;gap:5px;flex-wrap:wrap;letter-spacing:0;text-transform:none;font-weight:500;align-items:center}
+.bill-day-sum .bs-chip{font-size:10px;line-height:1;padding:5px 9px;border-radius:999px;background:var(--bg);color:var(--ink-2);box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.bill-day-sum .bs-chip.in{color:#16a34a}
+.bill-day-sum .bs-chip.out{color:#dc2626}
+/* 记录行按压反馈（新拟态凹陷） */
+.rec-row{transition:transform .08s ease}
+.rec-row:active{transform:scale(.985);background:var(--bg)!important}
+.bill-day::after{content:"";min-width:8px;flex:1;height:1px;background:var(--line);margin-left:4px}
 /* 分析页 */
 .ana-chart{border-radius:var(--r-lg);padding:26px 22px;
   background:
@@ -1194,8 +1203,16 @@ function renderBills(){
   all.forEach(r=>{groups[r.date]=groups[r.date]||[];groups[r.date].push(r)});
   bl.innerHTML=Object.keys(groups).map(dt=>{
     let ds=dt.split("-");let dayN=ds[2];let wd=["周日","周一","周二","周三","周四","周五","周六"][new Date(+ds[0],+ds[1]-1,+ds[2]).getDay()];
-    return `<div class="bill-day">${dt} <span class="ds">${wd}</span></div>`+
-    groups[dt].map(r=>`<div class="rec-row" onclick="openEdit('${r.id}')" style="background:var(--card);border-radius:14px;margin-bottom:6px">
+    // 当日收支合计：总收入 / 总支出 / 净收支
+    let dayRecs=groups[dt],inSum=0,outSum=0;
+    for(let i=0;i<dayRecs.length;i++){let r=dayRecs[i];if(r.type==="in")inSum+=r.amt;else outSum+=r.amt}
+    let net=inSum-outSum;
+    let chips='';
+    if(inSum>0)chips+='<span class="bs-chip in">收 +'+fmt(inSum)+'</span>';
+    if(outSum>0)chips+='<span class="bs-chip out">支 -'+fmt(outSum)+'</span>';
+    chips+='<span class="bs-chip '+(net>=0?"in":"out")+'">净 '+(net>=0?"+":"-")+fmt(Math.abs(net))+'</span>';
+    return `<div class="bill-day">${dt} <span class="ds">${wd}</span><span class="bill-day-sum">${chips}</span></div>`+
+    dayRecs.map(r=>`<div class="rec-row" onclick="openEdit('${r.id}')" style="background:var(--card);border-radius:14px;margin-bottom:6px">
       <div class="rec-ic" style="color:${catObj(r.cat).c}">${catIcon(r.cat)}</div>
       <div class="rec-mid"><div class="n">${esc(catObj(r.cat).n)}</div><div class="t">${esc(r.note||"")}</div></div>
       <div class="rec-amt ${r.type}">${r.type==="in"?"+":"-"}¥${fmt(r.amt)}</div></div>`).join("");
@@ -1231,11 +1248,14 @@ function hl(txt,kw){
   if(i<0)return esc(s);
   return esc(s.slice(0,i))+'<span class="hl">'+esc(s.slice(i,i+k.length))+'</span>'+esc(s.slice(i+k.length));
 }
+let _billSearchT=null;
 function onBillSearch(){
   let el=document.getElementById("billSearch");
   let clr=document.getElementById("bsClear");
   if(clr)clr.style.display=(el&&el.value)?"grid":"none";
-  renderBills();
+  // 防抖：200ms 内合并输入，避免大数据量下每击键全量渲染卡顿
+  clearTimeout(_billSearchT);
+  _billSearchT=setTimeout(()=>renderBills(),200);
 }
 function clearBillSearch(){
   let el=document.getElementById("billSearch");
