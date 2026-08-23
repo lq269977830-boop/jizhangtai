@@ -1479,12 +1479,12 @@ function startVoice(btn){
 }
 
 // ============ iOS：Web Speech API（Apple 服务）============
-let recog=null,_finalT="";
+let recog=null,_finalT="",_interimT="";
 function startVoiceWS(btn){
   if(recog&&recog._live){stopVoiceWS();return}
   if(recog){recog._stop=true;if(recog._r)try{recog._r.abort&&recog._r.abort()}catch(e){}recog._live=false;recog=null}
-  _finalT="";
-  recog={_live:true,_stop:false,_done:false,_btn:btn,_r:null};
+  _finalT="";_interimT="";
+  recog={_live:true,_stop:false,_done:false,_btn:btn,_r:null,_attempts:0,_maxAttempts:3};
   btn.classList.add("live");
   let sp=btn.querySelector("span");if(sp)sp.textContent="聆听中…(说完自动结束)";
   _speechBeginWS();
@@ -1492,38 +1492,63 @@ function startVoiceWS(btn){
 function _speechBeginWS(){
   if(!recog||!recog._live||recog._stop)return;
   let SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  let r=new SR();
+  if(!SR){toast("此浏览器不支持语音识别，请用 Safari 打开");return}
+  let r;
+  try{r=new SR()}catch(e){toast("无法创建语音识别");return}
   r.lang="zh-CN";
-  r.interimResults=false;
+  r.interimResults=true;        // 关键：捕获 interim，iOS 很多情况 final 不来
   r.continuous=false;
   recog._r=r;
   r.onresult=e=>{
-    let got=false;
-    for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal){_finalT+=e.results[i][0].transcript;got=true}}
-    if(got&&recog&&!recog._done){recog._done=true;stopVoiceWS()}
+    let got="";
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      got+=e.results[i][0].transcript;
+      if(e.results[i].isFinal)_finalT+=e.results[i][0].transcript;
+    }
+    _interimT=got;
   };
   r.onerror=e=>{
-    const eMap={"not-allowed":"语音识别未授权：请到 设置→Safari浏览器→语音识别 里允许","network":"需联网，请检查网络","no-speech":"没听到声音，请靠近麦克风再说一次","audio-capture":"无麦克风","language-not-supported":"语言不支持","aborted":"iOS 识别被打断，请再点一次按钮重试"};
+    const eMap={"not-allowed":"语音识别未授权：请到 设置→Safari浏览器→语音识别 里允许","network":"需联网，请检查网络","no-speech":"没听到声音，请靠近麦克风再说一次","audio-capture":"无麦克风","language-not-supported":"语言不支持","aborted":"iOS 识别被打断，正在重试…"};
     const msg=eMap[e.error]||e.error;
-    // iOS Safari 上 "aborted" 经常在 start() 后立即触发（系统短暂打断），自动重试一次
-    if(e.error==="aborted"&&recog&&recog._live&&!recog._stop&&!recog._aborted){
-      recog._aborted=true;
-      try{recog._r&&recog._r.start()}catch(e2){
-        toast("语音："+msg);
-        if(recog){recog._stop=true;recog._live=false;recog._r=null}
-        let b=document.querySelector(".tool.live");if(b){b.classList.remove("live");let sp2=b.querySelector("span");if(sp2)sp2.textContent="语音"}
-        recog=null;
-      }
-      return;
-    }
+    // iOS 上 "aborted" 常在 start() 后立即触发（系统短暂打断），交给 onend 统一重试，不在本处 toast
+    if(e.error==="aborted"){return;}
     toast("语音："+msg);
     if(recog){recog._stop=true;recog._live=false;recog._r=null}
     let b=document.querySelector(".tool.live");if(b){b.classList.remove("live");let sp2=b.querySelector("span");if(sp2)sp2.textContent="语音"}
-    recog=null;};
-  r.onend=()=>{
-    if(recog&&recog._live&&!recog._done){recog._done=true;stopVoiceWS()}
+    recog=null;
   };
-  try{r.start()}catch(e){toast("无法启动语音识别");stopVoiceWS()}
+  r.onend=()=>{
+    if(!recog||!recog._live)return;
+    // 优先用 final，兜底用 interim（iOS 常只有 interim 文本）
+    let t=(_finalT||_interimT).trim();
+    if(t&&!recog._done){
+      recog._done=true;recog._stop=true;recog._live=false;
+      let btn=recog._btn;recog=null;
+      if(btn){btn.classList.remove("live");let sp=btn.querySelector("span");if(sp)sp.textContent="语音"}
+      handleVoiceText(t);toast("已识别");
+      return;
+    }
+    // 没拿到文本：自动重试（iOS 常需多试），每次新建实例更稳
+    if(recog._attempts<recog._maxAttempts&&!recog._stop){
+      recog._attempts++;
+      _speechBeginWS();
+      return;
+    }
+    // 超过重试次数仍为空
+    recog._stop=true;recog._live=false;recog._r=null;
+    let b=document.querySelector(".tool.live");if(b){b.classList.remove("live");let sp2=b.querySelector("span");if(sp2)sp2.textContent="语音"}
+    recog=null;
+    toast("未识别到语音，请再试一次（确认 设置→Safari→语音识别 已开启）");
+  };
+  try{r.start()}catch(e){
+    // start 抛错：走与 onend 等同的兜底逻辑
+    if(recog&&recog._live){
+      if(recog._attempts<recog._maxAttempts){recog._attempts++;_speechBeginWS();}
+      else{recog._stop=true;recog._live=false;recog._r=null;
+        let b=document.querySelector(".tool.live");if(b){b.classList.remove("live");let sp2=b.querySelector("span");if(sp2)sp2.textContent="语音"}
+        recog=null;toast("无法启动语音识别，请再试一次");}
+    }
+  }
 }
 function stopVoiceWS(){
   if(!recog)return;
@@ -1532,7 +1557,7 @@ function stopVoiceWS(){
   recog._live=false;
   let btn=recog._btn;recog=null;
   if(btn){btn.classList.remove("live");let sp=btn.querySelector("span");if(sp)sp.textContent="语音"}
-  let t=_finalT.trim();
+  let t=(_finalT||_interimT).trim();
   if(t){handleVoiceText(t);toast("已识别")}else{toast("未识别到语音，请再试一次")}
 }
 
