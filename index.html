@@ -767,6 +767,11 @@ textarea{min-height:56px;resize:none;margin-top:8px}
         <div class="mi-t"><div class="mi-n">导入备份</div><div class="mi-d">从 JSON 恢复数据</div></div>
         <div class="mi-a">›</div>
       </button>
+      <button class="mine-item rescue-item" onclick="openRescue()" style="background:color-mix(in srgb,var(--warn) 12%,transparent)">
+        <div class="mi-ic" style="color:var(--warn)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2-2 2.6-2.6z"/></svg></div>
+        <div class="mi-t"><div class="mi-n" style="color:var(--warn)">🔧 数据急救 / 找回旧账</div><div class="mi-d">换了版本后账看不到？点此从其他版本钥匙找回</div></div>
+        <div class="mi-a">›</div>
+      </button>
       <button class="mine-item" onclick="clearData()">
         <div class="mi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></div>
         <div class="mi-t"><div class="mi-n">清空数据</div><div class="mi-d" style="color:var(--warn)">删除全部记录（不可恢复）</div></div>
@@ -858,7 +863,7 @@ IC.gift=svg('<rect x="4" y="9" width="16" height="11" rx="2"/><path d="M12 9v11M
 IC.invest=svg('<path d="M4 17l5-5 3 3 7-8"/><path d="M15 7h4v4"/>');
 IC.plus=svg('<path d="M12 5v14M5 12h14"/>');
 const CUSTOM_ICONS=["break","lunch","dinner","coffee","milk","cat","water","phone","gas","shop","fruit","snack","house","salary","bonus","reimb","gift","invest","other"];
-/* ============ 数据（保持 jz_v9） ============ */
+/* ============ 数据（localStorage: jz_pro_v1，客户版/Pro） ============ */
 const KEY="jz_pro_v1";
 const CATS=[
   {k:"break",n:"早餐",ic:"break",c:"#D97B5F"},{k:"lunch",n:"午餐",ic:"lunch",c:"#C98A5E"},
@@ -2081,6 +2086,60 @@ function clearData(){openSheet(`<div class="grab"></div><h2>清空数据</h2><di
 function doClear(){state.records=[];save();render();renderBills();closeSheet();toast("已清空")}
 function exportData(){let d=JSON.stringify({records:state.records,budget:state.budget,custom:state.custom});let b=new Blob([d],{type:"application/json"});let u=URL.createObjectURL(b);let a=document.createElement("a");a.href=u;a.download="记账台Pro备份.json";a.click();URL.revokeObjectURL(u);toast("已导出")}
 function importData(){let i=document.createElement("input");i.type="file";i.accept=".json";i.onchange=e=>{let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=ev=>{try{let d=JSON.parse(ev.target.result);if(d.records){state.records=d.records;if(d.budget)state.budget=d.budget;if(d.custom)state.custom=d.custom;save();render();renderBills();closeSheet();toast("导入成功")}else toast("文件格式不对")}catch(x){toast("导入失败")}};r.readAsText(f)};i.click()}
+function openRescue(){
+  let found=[];
+  for(let i=0;i<localStorage.length;i++){
+    let k=localStorage.key(i);
+    if(!/^jz/.test(k))continue;
+    if(k===KEY||k.indexOf(KEY+"_")===0)continue;
+    try{let a=JSON.parse(localStorage.getItem(k));if(Array.isArray(a)&&a.length)found.push({k,a});}catch(e){}
+  }
+  if(!found.length){toast("没找到其他版本的账");return;}
+  let total=found.reduce((s,o)=>s+o.a.length,0);
+  let list=found.map(o=>`<div style="display:flex;justify-content:space-between;padding:8px 12px;font-size:13px;background:var(--chip);border-radius:12px;margin-bottom:8px"><span>钥匙 <code>${o.k}</code></span><span>${o.a.length} 条</span></div>`).join("");
+  openSheet(`<div class="grab"></div><h2>🔧 数据急救</h2><div class="deck">Rescue old data</div>
+    <p style="font-size:14px;margin:14px 0;line-height:1.7">检测到同浏览器里还有 <b>${total}</b> 条旧版账（来自其他版本钥匙），当前版本有 <b>${state.records.length}</b> 条。可先备份再合并，合并按账单 ID 去重。</p>
+    ${list}
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:18px">
+      <button class="btn-pill" onclick="doRescueMerge()">合并到当前版本（${total} 条）</button>
+      <button class="btn-ghost" onclick="doRescueExport()">仅下载旧账备份（不合并）</button>
+      <button class="btn-ghost" onclick="closeSheet()">取消</button>
+    </div>`);
+}
+function doRescueMerge(){
+  let added=0;
+  for(let i=0;i<localStorage.length;i++){
+    let k=localStorage.key(i);
+    if(!/^jz/.test(k))continue;
+    if(k===KEY||k.indexOf(KEY+"_")===0)continue;
+    try{let a=JSON.parse(localStorage.getItem(k));if(Array.isArray(a))a.forEach(r=>{if(r&&r.id&&!state.records.some(x=>x.id===r.id)){state.records.push(r);added++;}});}catch(e){}
+  }
+  save();render();renderBills();closeSheet();toast("已合并 "+added+" 条旧账");
+}
+function doRescueExport(){
+  let all=[];
+  for(let i=0;i<localStorage.length;i++){
+    let k=localStorage.key(i);
+    if(!/^jz/.test(k))continue;
+    if(k===KEY||k.indexOf(KEY+"_")===0)continue;
+    try{let a=JSON.parse(localStorage.getItem(k));if(Array.isArray(a))all=all.concat(a);}catch(e){}
+  }
+  if(!all.length){toast("没有可备份的旧账");return;}
+  let b=new Blob([JSON.stringify(all,null,2)],{type:"application/json"});
+  let u=URL.createObjectURL(b);let a=document.createElement("a");a.href=u;a.download="旧版账备份.json";a.click();URL.revokeObjectURL(u);
+  toast("已下载旧账备份（"+all.length+" 条）");
+}
+function autoRescue(){
+  if(state.records.length>0)return;
+  let f=0;
+  for(let i=0;i<localStorage.length;i++){
+    let k=localStorage.key(i);
+    if(!/^jz/.test(k))continue;
+    if(k===KEY||k.indexOf(KEY+"_")===0)continue;
+    try{let a=JSON.parse(localStorage.getItem(k));if(Array.isArray(a)&&a.length)f+=a.length;}catch(e){}
+  }
+  if(f>0)setTimeout(openRescue,900);
+}
 /* ============ AI 助手 ============ */
 const CAT_AVATAR="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAoACgDASIAAhEBAxEB/8QAGwABAAEFAQAAAAAAAAAAAAAAAAYBAwQFBwj/xAAoEAABAwMDBAICAwAAAAAAAAABAgMEAAURBhIhBxMiMRRRMkFhcYH/xAAYAQADAQEAAAAAAAAAAAAAAAAAAgMBBP/EACIRAAEEAgEEAwAAAAAAAAAAAAEAAgMREiEEMUFRkRMUIv/aAAwDAQACEQMRAD8A9l0pShCUrSydVWCMspkXFtsdwN7ik7SonAGcYrYx58GSvZHmxnlY3YQ6lRx98GkZIx4tptZYulk0pSnWpUI6oavhafiiG/LRHceaKzlXkpPrake8k1NnEJcQpCxlKhgj7Fcf1f0Ntc1lDlhuMmLK7vkqY6p5Aa58E/sbeMc/xVGceHkAxyvLQfA977eipTOkDfwLXO7nqVTrEHUcD5zTqN6Cy06VdnnBUojxBweMj0eKvWO8zXLVedXvbX+w2sI3NoQcpSMDxwDjgZ49mpK30MmW9lxxWsJTCHE7HfgxNqyk/olS/WcVlWrpE2q0RLFcr/cW7S6oLVDYhoZWrCvxW4FK4JHOP74pp4+M3j/RikBbkDsG8LvHpvegb33Kh8MkjhKGUa3vV116+9aUw6BSblcenzd4ufC7hJcfaHIw3wkcZOAdpIH0RSpzbocW3wGIMJhDEaO2lpptA4QlIwAP8pU34ZHAUOw8BdTAWtAKv0pSlTJQkD3SlCFTIzSlKEL/2Q==";
 function aiAdv(){
@@ -2462,7 +2521,7 @@ function recThumb(r){let a=recImgs(r);return a.length?'<img class="rec-img" src=
 
 function toast(t){let el=document.getElementById("toast");el.textContent=t;el.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove("show"),2400)}
 /* 启动 */
-applyMode();render();renderBills();renderBars();
+applyMode();render();renderBills();renderBars();autoRescue();
 (function(){let s=document.getElementById("avState");if(s)s.textContent=aiV.key?"已开启（AI 优先）":"未配置（用本地OCR）"})();
 </script>
 <div class="modal-mask" id="monthMask" onclick="if(event.target===this)closeMonthPicker()">
