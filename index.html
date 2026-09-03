@@ -3,10 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>晴·财务</title>
+<title>麻薯记账</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob: 'unsafe-inline'; frame-ancestors 'none'; object-src 'none'; base-uri 'none'">
 <link rel="icon" type="image/png" href="data:image/png;base64,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">
 <link rel="apple-touch-icon" href="data:image/png;base64,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">
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://unpkg.com/tesseract.js@4.1.1/dist/tesseract.min.js';document.head.appendChild(s);"></script>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js';document.head.appendChild(s);"></script>
 <style>
 /* ============================================================
    DESIGN SYSTEM — Editorial Minimalism + Premium Finance
@@ -115,6 +117,7 @@ body{padding:0;position:relative;overflow-x:hidden}
 .hd .brand{display:flex;align-items:center;gap:12px}
 .logo{width:36px;height:36px;border-radius:50%;overflow:hidden;box-shadow:var(--sh-sm);flex:none}
 .logo img{width:100%;height:100%;object-fit:cover}
+.bname{font-size:17px;font-weight:700;color:var(--ink-2);letter-spacing:.5px;white-space:nowrap}
 .hd .center{position:absolute;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px}
 .month-nav{display:flex;align-items:center;gap:2px}
 .month-nav button{background:none;border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;
@@ -551,13 +554,72 @@ textarea{min-height:56px;resize:none;margin-top:8px}
 .mp-cell:active{filter:brightness(.95)}
 .btn{display:inline-flex;align-items:center;justify-content:center;padding:9px 16px;border-radius:14px;border:1px solid var(--card-border);background:var(--card);color:var(--ink);font-size:14px;font-weight:600;cursor:pointer}
 .btn.ghost{background:transparent;color:var(--ink-2)}
-.btn:active{filter:brightness(.95)}</style>
+.btn:active{filter:brightness(.95)}.img-preview{width:100%;max-height:180px;object-fit:cover;border-radius:var(--r-md);margin:8px 0;border:1px solid var(--line)}
+.rec-img{width:38px;height:38px;border-radius:9px;object-fit:cover;flex:0 0 auto;cursor:pointer;border:1px solid var(--line);margin-left:6px}
+.img-big{width:100%;border-radius:var(--r-md);margin:10px 0 14px;border:1px solid var(--line)}
+/* 附图多图 */
+.pure-wrap{margin-top:10px}
+.modal-mask#imgZoom{background:rgba(0,0,0,.9);z-index:360}
+.pure-empty{font-size:12px;color:var(--ink-3);background:var(--bg);border:1px dashed var(--line);border-radius:12px;padding:10px 12px;line-height:1.5}
+.pure-prev{position:relative;width:100%;max-height:200px;border-radius:14px;overflow:hidden;cursor:pointer;border:1px solid var(--line)}
+.pure-prev img{width:100%;max-height:200px;object-fit:cover;display:block}
+.pure-prev .pure-del{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:50%;border:none;background:rgba(0,0,0,.55);color:#fff;font-size:13px;line-height:24px;cursor:pointer;padding:0}
+.pure-prev .pure-badge{position:absolute;left:8px;bottom:8px;background:rgba(0,0,0,.55);color:#fff;font-size:11px;padding:2px 8px;border-radius:20px}
+.pure-more{font-size:12.5px;color:var(--brand);margin:8px 2px 4px;cursor:pointer;user-select:none}
+.pure-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.pure-thumb{position:relative;width:62px;height:62px;border-radius:11px;overflow:hidden;cursor:pointer;border:1px solid var(--line);flex:0 0 auto}
+.pure-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.pure-thumb .pure-del{position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;border:none;background:rgba(0,0,0,.6);color:#fff;font-size:11px;line-height:18px;cursor:pointer;padding:0}
+.pure-tip{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+.pure-loading{font-size:12px;color:var(--ink-2);display:inline-flex;align-items:center}
+.pure-loading .spinner.sm{width:12px;height:12px;border-width:2px;border:2px solid var(--line);border-top-color:var(--brand);border-radius:50%;animation:spin .8s linear infinite;margin-right:6px;display:inline-block}
+.pure-err{font-size:12px;color:#e5484d;display:inline-flex;align-items:center;gap:6px}
+.pure-retry{border:1px solid #e5484d;color:#e5484d;background:transparent;border-radius:8px;font-size:11px;padding:2px 8px;cursor:pointer}
+.tool.full{opacity:.5}
+/* 图片查看器 */
+.imgzoom-box{position:relative;width:100%;max-width:560px;display:flex;flex-direction:column;align-items:center}
+.imgzoom-bar{width:100%;display:flex;align-items:center;justify-content:space-between;color:#fff;font-size:13px;margin-bottom:8px;padding:0 2px}
+.imgzoom-bar-r{display:flex;gap:10px;align-items:center}
+.imgzoom-del{border:1px solid rgba(255,255,255,.5);background:transparent;color:#fff;border-radius:8px;font-size:12px;padding:3px 10px;cursor:pointer}
+.imgzoom-x{border:none;background:transparent;color:#fff;font-size:22px;line-height:1;cursor:pointer;padding:0 4px}
+.imgzoom-img{max-width:100%;max-height:74vh;border-radius:10px;object-fit:contain;background:#000}
+.imgzoom-nav{display:flex;gap:40px;margin-top:12px}
+.imgzoom-nav button{width:50px;height:50px;border-radius:50%;border:1px solid rgba(255,255,255,.4);background:rgba(0,0,0,.3);color:#fff;font-size:24px;cursor:pointer}
+.imgzoom-nav button:active{background:rgba(0,0,0,.5)}
+.bill-view-toggle{display:flex;gap:6px;margin:10px 0 4px}
+.bv-btn{flex:1;padding:8px 0;border:1px solid var(--line);background:var(--card);color:var(--ink-2);border-radius:10px;font-size:13px;cursor:pointer}
+.bv-btn.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+.bv-export{background:var(--brand);color:#fff;border-color:var(--brand);font-weight:600;flex:1.4}
+.bv-export:active{filter:brightness(.95)}
+.tbl-wrap{overflow-x:auto;margin-top:4px;-webkit-overflow-scrolling:touch}
+.bill-tbl{width:100%;border-collapse:collapse;font-size:12.5px;min-width:430px}
+.bill-tbl th{position:sticky;top:0;background:var(--bg);color:var(--ink-3);font-weight:600;text-align:left;padding:8px 8px;border-bottom:2px solid var(--line)}
+.bill-tbl td{padding:8px 8px;border-bottom:1px solid var(--line);color:var(--ink-1);vertical-align:middle}
+.bill-tbl tr:active{background:var(--card)}
+/* 导出 Excel 弹窗 */
+.exp-modal{background:var(--card);border-radius:22px;padding:22px 20px;width:100%;max-width:320px;box-shadow:0 12px 40px rgba(0,0,0,.3)}
+.exp-title{font-size:18px;font-weight:700;color:var(--ink);text-align:center;margin-bottom:4px}
+.exp-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:16px;line-height:1.5}
+.exp-opt{width:100%;padding:14px 0;border-radius:14px;border:1px solid var(--card-border);background:var(--bg);color:var(--ink);font-size:15px;font-weight:600;cursor:pointer;margin-bottom:10px}
+.exp-opt:active{filter:brightness(.95)}
+.exp-status{display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;color:var(--ink-2);margin:4px 0 12px}
+.exp-spin{width:16px;height:16px;border:2px solid var(--card-border);border-top-color:var(--accent,#7c5cfc);border-radius:50%;animation:expspin .8s linear infinite}
+@keyframes expspin{to{transform:rotate(360deg)}}
+.exp-cancel{width:100%;padding:12px 0;border:none;border-radius:14px;background:var(--card-border);color:var(--ink);font-size:14px;font-weight:600;cursor:pointer;margin-top:4px}
+.exp-cancel:active{opacity:.7}
+.exp-range-row{display:flex;align-items:center;gap:6px;margin-bottom:12px}
+.exp-lbl{font-size:13px;color:var(--ink-2);font-weight:600}
+.exp-sel{flex:1;padding:8px 6px;border-radius:10px;border:1px solid var(--card-border);background:var(--bg);color:var(--ink);font-size:14px;font-weight:600;text-align:center;appearance:none;-webkit-appearance:none}
+.exp-sep{font-size:13px;color:var(--ink-3)}
+.exp-go{width:100%;padding:14px 0;border-radius:14px;border:none;background:var(--brand);color:#fff;font-size:15px;font-weight:700;cursor:pointer;margin-top:4px}
+.exp-go:active{filter:brightness(.9)}
+</style>
 </head>
 <body>
 <div class="wrap">
   <!-- V1 顶部 -->
   <div class="hd">
-    <div class="brand"><div class="logo"><img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAoACgDASIAAhEBAxEB/8QAGwABAAEFAQAAAAAAAAAAAAAAAAYBAwQFBwj/xAAoEAABAwMDBAICAwAAAAAAAAABAgMEAAURBhIhBxMiMRRRMkFhcYH/xAAYAQADAQEAAAAAAAAAAAAAAAAAAgMBBP/EACIRAAEEAgEEAwAAAAAAAAAAAAEAAgMREiEEMUFRkRMUIv/aAAwDAQACEQMRAD8A9l0pShCUrSydVWCMspkXFtsdwN7ik7SonAGcYrYx58GSvZHmxnlY3YQ6lRx98GkZIx4tptZYulk0pSnWpUI6oavhafiiG/LRHceaKzlXkpPrake8k1NnEJcQpCxlKhgj7Fcf1f0Ntc1lDlhuMmLK7vkqY6p5Aa58E/sbeMc/xVGceHkAxyvLQfA977eipTOkDfwLXO7nqVTrEHUcD5zTqN6Cy06VdnnBUojxBweMj0eKvWO8zXLVedXvbX+w2sI3NoQcpSMDxwDjgZ49mpK30MmW9lxxWsJTCHE7HfgxNqyk/olS/WcVlWrpE2q0RLFcr/cW7S6oLVDYhoZWrCvxW4FK4JHOP74pp4+M3j/RikBbkDsG8LvHpvegb33Kh8MkjhKGUa3vV116+9aUw6BSblcenzd4ufC7hJcfaHIw3wkcZOAdpIH0RSpzbocW3wGIMJhDEaO2lpptA4QlIwAP8pU34ZHAUOw8BdTAWtAKv0pSlTJQkD3SlCFTIzSlKEL/2Q==" alt=""></div></div>
+    <div class="brand"><div class="logo"><img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAoACgDASIAAhEBAxEB/8QAGwABAAEFAQAAAAAAAAAAAAAAAAYBAwQFBwj/xAAoEAABAwMDBAICAwAAAAAAAAABAgMEAAURBhIhBxMiMRRRMkFhcYH/xAAYAQADAQEAAAAAAAAAAAAAAAAAAgMBBP/EACIRAAEEAgEEAwAAAAAAAAAAAAEAAgMREiEEMUFRkRMUIv/aAAwDAQACEQMRAD8A9l0pShCUrSydVWCMspkXFtsdwN7ik7SonAGcYrYx58GSvZHmxnlY3YQ6lRx98GkZIx4tptZYulk0pSnWpUI6oavhafiiG/LRHceaKzlXkpPrake8k1NnEJcQpCxlKhgj7Fcf1f0Ntc1lDlhuMmLK7vkqY6p5Aa58E/sbeMc/xVGceHkAxyvLQfA977eipTOkDfwLXO7nqVTrEHUcD5zTqN6Cy06VdnnBUojxBweMj0eKvWO8zXLVedXvbX+w2sI3NoQcpSMDxwDjgZ49mpK30MmW9lxxWsJTCHE7HfgxNqyk/olS/WcVlWrpE2q0RLFcr/cW7S6oLVDYhoZWrCvxW4FK4JHOP74pp4+M3j/RikBbkDsG8LvHpvegb33Kh8MkjhKGUa3vV116+9aUw6BSblcenzd4ufC7hJcfaHIw3wkcZOAdpIH0RSpzbocW3wGIMJhDEaO2lpptA4QlIwAP8pU34ZHAUOw8BdTAWtAKv0pSlTJQkD3SlCFTIzSlKEL/2Q==" alt=""></div><span class="bname">麻薯记账</span></div>
     <div class="center">
       <div class="month-nav">
         <button onclick="changeMonth(-1)" aria-label="上个月">‹</button>
@@ -659,6 +721,7 @@ textarea{min-height:56px;resize:none;margin-top:8px}
       </div>
       <div class="bill-tools">
         <button class="bill-cal-btn" onclick="openDatePicker()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9h18M8 3v3M16 3v3"/></svg>选日期</button>
+        <button class="bill-cal-btn" onclick="openExportExcel()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>导出Excel</button>
         <div class="bill-date-tag" id="billDateTag"></div>
       </div>
       <div id="billList"></div>
@@ -796,7 +859,7 @@ IC.invest=svg('<path d="M4 17l5-5 3 3 7-8"/><path d="M15 7h4v4"/>');
 IC.plus=svg('<path d="M12 5v14M5 12h14"/>');
 const CUSTOM_ICONS=["break","lunch","dinner","coffee","milk","cat","water","phone","gas","shop","fruit","snack","house","salary","bonus","reimb","gift","invest","other"];
 /* ============ 数据（保持 jz_v9） ============ */
-const KEY="jz_v9";
+const KEY="jz_pro_v1";
 const CATS=[
   {k:"break",n:"早餐",ic:"break",c:"#D97B5F"},{k:"lunch",n:"午餐",ic:"lunch",c:"#C98A5E"},
   {k:"dinner",n:"晚餐",ic:"dinner",c:"#B47A5C"},{k:"coffee",n:"咖啡",ic:"coffee",c:"#8B7355"},
@@ -827,7 +890,7 @@ if(!Array.isArray(state.customThemes))state.customThemes=[];
 // 兼容内存遗留的单槽自定义（旧代码 customTheme 只存在内存里）
 if(state.customTheme){state.customThemes.unshift(state.customTheme);state.customTheme=undefined}
 // AI 视觉识别配置（独立于 records，不进导出）
-let aiV={url:localStorage.getItem(KEY+"_avurl")||"https://qwen-proxy-csoaxqqpqn.cn-hangzhou.fcapp.run/v1",key:localStorage.getItem(KEY+"_avkey")||"",model:localStorage.getItem(KEY+"_avmodel")||"qwen-vl-max",token:localStorage.getItem(KEY+"_avtoken")||"",asr:localStorage.getItem(KEY+"_avasr")||"qwen3-asr-flash"};
+let aiV={url:localStorage.getItem(KEY+"_avurl")||"",key:localStorage.getItem(KEY+"_avkey")||"",model:localStorage.getItem(KEY+"_avmodel")||"qwen-vl-max",token:localStorage.getItem(KEY+"_avtoken")||"",asr:localStorage.getItem(KEY+"_avasr")||"qwen3-asr-flash"};
 function saveAiV(){localStorage.setItem(KEY+"_avurl",aiV.url);localStorage.setItem(KEY+"_avkey",aiV.key);localStorage.setItem(KEY+"_avmodel",aiV.model);localStorage.setItem(KEY+"_avtoken",aiV.token);localStorage.setItem(KEY+"_avasr",aiV.asr)}
 function save(){localStorage.setItem(KEY,JSON.stringify(state.records));localStorage.setItem(KEY+"_b",JSON.stringify(state.budget));localStorage.setItem(KEY+"_c",JSON.stringify(state.custom));localStorage.setItem(KEY+"_t",JSON.stringify(state.theme||null));localStorage.setItem(KEY+"_cts",JSON.stringify(state.customThemes||[]))}
 const today=new Date();let curY=today.getFullYear(),curM=today.getMonth();
@@ -1141,7 +1204,7 @@ function renderRec(rs){
     return `<div class="rec-row" onclick="openEdit('${r.id}')">
       <div class="rec-ic" style="color:${catObj(r.cat).c}">${catIcon(r.cat)}</div>
       <div class="rec-mid"><div class="n">${catObj(r.cat).n} ${src}</div><div class="t">${r.date.slice(5)}${r.note?" · "+r.note:""}</div></div>
-      <div class="rec-amt ${r.type}">${r.type==="in"?"+":"-"}¥${fmt(r.amt)}</div>
+      <div class="rec-amt ${r.type}">${r.type==="in"?"+":"-"}¥${fmt(r.amt)}</div>${recThumb(r)}
     </div>`;
   }).join("");
 }
@@ -1239,7 +1302,7 @@ function recRowHTML(r,kw){
   return `<div class="rec-row" onclick="openEdit('${r.id}')" style="background:var(--card);border-radius:14px;margin-bottom:6px">
     <div class="rec-ic" style="color:${catObj(r.cat).c}">${catIcon(r.cat)}</div>
     <div class="rec-mid"><div class="n">${hl(catObj(r.cat).n,kw)}</div><div class="t">${hl(r.note||"",kw)}</div></div>
-    <div class="rec-amt ${r.type}">${r.type==="in"?"+":"-"}¥${fmt(r.amt)}</div></div>`;
+    <div class="rec-amt ${r.type}">${r.type==="in"?"+":"-"}¥${fmt(r.amt)}</div>${recThumb(r)}</div>`;
 }
 function hl(txt,kw){
   let s=String(txt==null?"":txt);
@@ -1331,10 +1394,86 @@ function goTab(t){
     try{document.getElementById("statStore").textContent=Math.max(1,Math.round((localStorage.getItem(KEY)||"").length/1024))+" KB"}catch(e){}}
 }
 /* ============ 记账 Sheet ============ */
+function recImgs(r){return (r&&r.imgs&&r.imgs.length)?r.imgs:(r&&r.img?[r.img]:[])}
+/* ============ 附图（多图，上限5张） ============ */
+function isImgFile(f){let t=(f.type||"").toLowerCase();if(t.indexOf("image/")===0)return true;let ext=(f.name||"").split(".").pop().toLowerCase();return["jpg","jpeg","png","gif","webp","bmp","heic","heif"].includes(ext)}
+function onPureImgs(inp){
+  let files=Array.from(inp.files||[]);inp.value="";
+  if(!files.length)return;
+  let room=MAX_IMGS-_pendingImgs.length;
+  if(room<=0){toast("最多附 "+MAX_IMGS+" 张图，已达上限");return}
+  if(files.length>room){toast("还可添加 "+room+" 张，已忽略多余的");files=files.slice(0,room)}
+  files.forEach(f=>{
+    if(!isImgFile(f)){toast("「"+(f.name||"该文件")+"」不是图片，已跳过");return}
+    processPureFile(f);
+  });
+  renderPendingImgs();
+}
+function processPureFile(f){
+  _pureBusy++;updatePureTip();
+  let reader=new FileReader();
+  reader.onerror=()=>{_pureBusy--;onPureFail(f,"读取失败");};
+  reader.onload=ev=>{
+    let img=new Image();
+    img.onerror=()=>{_pureBusy--;onPureFail(f,"图片解码失败");};
+    img.onload=()=>{
+      try{
+        let scale=Math.min(1,1200/img.width);
+        let cv=document.createElement("canvas");cv.width=img.width*scale;cv.height=img.height*scale;
+        cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);
+        let dataUrl=cv.toDataURL("image/jpeg",0.78);
+        if(_pendingImgs.length<MAX_IMGS){_pendingImgs.push(dataUrl);_pureBroken=_pureBroken.filter(x=>x.f!==f);}
+        else toast("最多附 "+MAX_IMGS+" 张图");
+      }catch(e){onPureFail(f,"图片处理失败");}
+      _pureBusy--;renderPendingImgs();
+    };
+    img.src=ev.target.result;
+  };
+  try{reader.readAsDataURL(f);}catch(e){_pureBusy--;onPureFail(f,"读取失败");}
+}
+function onPureFail(f,msg){_pureBroken.push({f,msg});toast(msg+"，可点重试");renderPendingImgs();}
+function retryBroken(i){let it=_pureBroken.splice(i,1)[0];if(it)processPureFile(it.f);}
+function delPendingImg(i){if(i<0||i>=_pendingImgs.length)return;_pendingImgs.splice(i,1);renderPendingImgs();}
+function togglePureList(){let l=document.getElementById("pureList");if(l)l.style.display=l.style.display==="none"?"flex":"none";}
+function updatePureTip(){
+  let tip=document.getElementById("pureTip");if(!tip)return;
+  let parts=[];
+  if(_pureBusy>0)parts.push('<span class="pure-loading"><span class="spinner sm"></span>图片处理中 '+_pureBusy+' 张…</span>');
+  _pureBroken.forEach((b,i)=>{parts.push('<span class="pure-err">'+b.msg+'：'+(b.f.name||"图片")+' <button class="pure-retry" onclick="retryBroken('+i+')">重试</button></span>');});
+  tip.innerHTML=parts.join("");
+}
+function renderPendingImgs(){
+  let wrap=document.getElementById("pureImgWrap");if(!wrap)return;
+  let n=_pendingImgs.length;
+  let cnt=document.getElementById("pureCount");if(cnt)cnt.textContent=n?("附图 "+n+"/"+MAX_IMGS):"附图";
+  let btn=document.getElementById("pureAddBtn");if(btn)btn.classList.toggle("full",n>=MAX_IMGS);
+  let tip=document.getElementById("pureTip");if(tip&&_pureBusy===0&&_pureBroken.length===0)tip.innerHTML="";
+  if(n===0){wrap.innerHTML='<div class="pure-empty">未附图 · 仅保存查看，不会自动识别（最多 '+MAX_IMGS+' 张）</div>';return;}
+  let html='<div class="pure-prev" onclick="zoomImgs(_pendingImgs,0,true)"><img src="'+_pendingImgs[0]+'"><button class="pure-del" onclick="event.stopPropagation();delPendingImg(0)">✕</button><span class="pure-badge">'+(n>1?("1/"+n):"预览")+'</span></div>';
+  if(n>1){
+    html+='<div class="pure-more" onclick="togglePureList()">展开全部 '+n+' 张 ›</div>';
+    html+='<div class="pure-list" id="pureList" style="display:none">';
+    _pendingImgs.forEach((src,i)=>{html+='<div class="pure-thumb" onclick="zoomImgs(_pendingImgs,'+i+',true)"><img src="'+src+'"><button class="pure-del" onclick="event.stopPropagation();delPendingImg('+i+')">✕</button></div>';});
+    html+='</div>';
+  }
+  wrap.innerHTML=html;
+}
+function viewImg(id){let r=state.records.find(x=>x.id===id);if(!r)return;let imgs=recImgs(r);if(!imgs.length)return;zoomImgs(imgs,0,false);}
+/* ============ 图片查看器（独立浮层，不覆盖记账表单） ============ */
+let _zoomArr=[],_zoomIdx=0,_zoomPending=false;
+function zoomImgs(arr,idx,pending){if(!arr||!arr.length)return;_zoomArr=arr.slice();_zoomIdx=idx||0;_zoomPending=!!pending;renderImgZoom();document.getElementById("imgZoom").classList.add("show");}
+function renderImgZoom(){let img=document.getElementById("imgZoomImg"),idx=document.getElementById("imgZoomIdx"),prev=document.getElementById("imgZoomPrev"),next=document.getElementById("imgZoomNext"),del=document.getElementById("imgZoomDel");
+  img.src=_zoomArr[_zoomIdx]||"";idx.textContent=(_zoomIdx+1)+" / "+_zoomArr.length;
+  prev.style.visibility=_zoomArr.length>1?"visible":"hidden";next.style.visibility=_zoomArr.length>1?"visible":"hidden";
+  del.style.display=_zoomPending?"inline-flex":"none";}
+function imgZoomPrev(){if(_zoomIdx>0){_zoomIdx--;renderImgZoom();}}
+function imgZoomNext(){if(_zoomIdx<_zoomArr.length-1){_zoomIdx++;renderImgZoom();}}
+function imgZoomDel(){if(!_zoomPending)return;delPendingImg(_zoomIdx);if(!_pendingImgs.length){closeImgZoom();return;}_zoomArr=_pendingImgs.slice();_zoomIdx=Math.min(_zoomIdx,_pendingImgs.length-1);renderImgZoom();}
+function closeImgZoom(){document.getElementById("imgZoom").classList.remove("show");}
 function openSheet(html){document.getElementById("sheetIn").innerHTML=html;document.getElementById("sheet").classList.add("show")}
 function closeSheet(){document.getElementById("sheet").classList.remove("show");editingId=null}
 function openAdd(){editingId=null;editingType="out";openSheet(modalHtml())}
-function openEdit(id){editingId=id;let r=state.records.find(x=>x.id===id);if(!r)return;editingType=r.type;openSheet(modalHtml(r))}
+function openEdit(id){editingId=id;let r=state.records.find(x=>x.id===id);if(!r)return;editingType=r.type;_pendingImgs=recImgs(r).slice();_pendingImg=null;_pureBroken=[];openSheet(modalHtml(r));renderPendingImgs()}
 function modalHtml(r){
   let isEdit=!!r;let type=editingType;let cat=r?r.cat:"lunch";
   let cats=CATS.concat(state.custom).filter(c=>c.k!=="plus");
@@ -1379,9 +1518,13 @@ function modalHtml(r){
     <div class="tools">
       <button class="tool" id="voiceBtn" onclick="startVoice(this)">${IC.plus.replace(/<path d="M12 5v14M5 12h14"\/>/,'<path d="M12 14a2 2 0 0 0 2-2V8a2 2 0 0 0-4 0v4a2 2 0 0 0 2 2zM6 10v2a6 6 0 0 0 12 0v-2M12 18v3"/>')}<span>语音</span></button>
       <button class="tool" onclick="document.getElementById('imgInp').click()">${IC.shop.replace(/<path d="M9 11V6a3 3 0 0 1 6 0v5"\/>/,'<rect x="3" y="5" width="18" height="16" rx="2"/><circle cx="8.5" cy="10" r="1.2"/>')}<span>OCR</span></button>
+      <button class="tool" id="pureAddBtn" onclick="document.getElementById('pureImgInp').click()">${IC.shop}<span id="pureCount">附图</span></button>
       <button class="tool" onclick="togglePaste()">${IC.plus.replace(/<path d="M12 5v14M5 12h14"\/>/,'<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>')}<span>粘贴</span></button>
     </div>
     <input type="file" id="imgInp" accept="image/*" style="display:none" onchange="onImg(this)">
+    <input type="file" id="pureImgInp" accept="image/*" multiple style="display:none" onchange="onPureImgs(this)">
+    <div id="pureImgWrap" class="pure-wrap"></div>
+    <div id="pureTip" class="pure-tip"></div>
     <div class="ocr-status" id="ocrStatus"></div>
     <textarea id="pasteBox" placeholder="粘贴语音转文字，如「午餐花了25」" style="display:none"></textarea>
     <div style="display:flex;gap:8px;margin-top:8px;display:none" id="pasteBtns">
@@ -1450,9 +1593,9 @@ function saveRec(){
   let cat=CATS.concat(state.custom).find(c=>c.n===catKey);let key=cat?cat.k:"other";
   let note=document.getElementById("note").value;
   let date=document.getElementById("dateInp").value||ymd(new Date());
-  if(editingId){let r=state.records.find(x=>x.id===editingId);if(r){r.type=type;r.cat=key;r.amt=amt;r.note=note;r.date=date}}
-  else{let rec={id:Date.now()+"",type,cat:key,amt,note,date,ts:Date.now()};if(_voiceFlag)rec.voice=true;if(_pendingImg)rec.img=_pendingImg;state.records.push(rec)}
-  _voiceFlag=false;_pendingImg=null;
+  if(editingId){let r=state.records.find(x=>x.id===editingId);if(r){r.type=type;r.cat=key;r.amt=amt;r.note=note;r.date=date;let all=(_pendingImg?[_pendingImg]:[]).concat(_pendingImgs);if(all.length)r.imgs=all.slice(0,MAX_IMGS);else{r.imgs=[];delete r.img;}}}
+  else{let rec={id:Date.now()+"",type,cat:key,amt,note,date,ts:Date.now()};if(_voiceFlag)rec.voice=true;let all=(_pendingImg?[_pendingImg]:[]).concat(_pendingImgs);if(all.length)rec.imgs=all.slice(0,MAX_IMGS);state.records.push(rec)}
+  _voiceFlag=false;_pendingImg=null;_pendingImgs=[];_pureBroken=[];_pureBusy=0;
   save();render();renderBills();closeSheet();toast("已保存");
 }
 function delRec(id){openSheet(`<div class="grab"></div><h2>删除记录</h2><div class="deck">Delete</div>
@@ -1700,7 +1843,7 @@ function togglePaste(){let p=document.getElementById("pasteBox");let b=document.
 function applyPaste(){let t=document.getElementById("pasteBox").value.trim();if(!t){toast("先粘贴文字");return}
   applyVoice(t);toast("已识别填入")}
 /* ============ OCR / AI 视觉 ============ */
-let _pendingImg=null,ocrBusy=false;
+let _pendingImg=null,ocrBusy=false;const MAX_IMGS=5;let _pendingImgs=[];let _pureBroken=[];let _pureBusy=0;
 function onImg(inp){let f=inp.files[0];if(!f)return;let st=document.getElementById("ocrStatus");
   let reader=new FileReader();
   reader.onload=ev=>{let img=new Image();
@@ -1866,10 +2009,11 @@ function parseAmount(txt){
 }
 /* ============ AI 视觉设置 ============ */
 function openAiV(){
-  openSheet(`<div class="grab"></div><h2>AI 视觉识别</h2>
-   <div class="deck">拍照识别账单 · 支持火山方舟/通义/OpenAI 兼容</div>
+  openSheet(`<div class="grab"></div><h2>AI 视觉识别（Pro）</h2>
+   <div class="deck">拍照识别账单 · 用你自己的 Key，额度自控</div>
+   <div style="margin:10px 0 14px;padding:12px 14px;border-radius:12px;background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.30);font-size:13px;line-height:1.7;color:rgba(255,255,255,.85)">🔒 <b>隐私说明</b>：你填的 API Key 仅保存在你本机浏览器（localStorage），<b>不会上传给开发者或任何第三方</b>。AI 仅在「你主动拍照 / 语音」时，把图片或语音发给「你填写的」中转地址。不想联网可完全留空，使用本地识别离线记账。</div>
    <div class="field-label">接口地址 (Base URL)</div>
-   <input type="text" id="avUrl" value="${aiV.url}" placeholder="https://qwen-proxy-csoaxqqpqn.cn-hangzhou.fcapp.run/v1">
+   <input type="text" id="avUrl" value="${aiV.url}" placeholder="填你自己的中转地址，例如 https://你的中转/v1">
    <div class="field-label">API Key</div>
    <input type="password" id="avKey" value="${aiV.key}" placeholder="粘贴你的 key">
    <div class="field-label">模型名（接入点 ID）</div>
@@ -1935,7 +2079,7 @@ function clearData(){openSheet(`<div class="grab"></div><h2>清空数据</h2><di
   <p style="font-size:14px;color:var(--warn);margin:16px 0 26px">将删除全部记录，此操作不可恢复。建议先导出备份。</p>
   <button class="btn-pill" style="background:var(--warn)" onclick="doClear()">确认清空</button><button class="btn-ghost" onclick="closeSheet()">取消</button>`)}
 function doClear(){state.records=[];save();render();renderBills();closeSheet();toast("已清空")}
-function exportData(){let d=JSON.stringify({records:state.records,budget:state.budget,custom:state.custom});let b=new Blob([d],{type:"application/json"});let u=URL.createObjectURL(b);let a=document.createElement("a");a.href=u;a.download="记账台备份.json";a.click();URL.revokeObjectURL(u);toast("已导出")}
+function exportData(){let d=JSON.stringify({records:state.records,budget:state.budget,custom:state.custom});let b=new Blob([d],{type:"application/json"});let u=URL.createObjectURL(b);let a=document.createElement("a");a.href=u;a.download="记账台Pro备份.json";a.click();URL.revokeObjectURL(u);toast("已导出")}
 function importData(){let i=document.createElement("input");i.type="file";i.accept=".json";i.onchange=e=>{let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=ev=>{try{let d=JSON.parse(ev.target.result);if(d.records){state.records=d.records;if(d.budget)state.budget=d.budget;if(d.custom)state.custom=d.custom;save();render();renderBills();closeSheet();toast("导入成功")}else toast("文件格式不对")}catch(x){toast("导入失败")}};r.readAsText(f)};i.click()}
 /* ============ AI 助手 ============ */
 const CAT_AVATAR="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAoACgDASIAAhEBAxEB/8QAGwABAAEFAQAAAAAAAAAAAAAAAAYBAwQFBwj/xAAoEAABAwMDBAICAwAAAAAAAAABAgMEAAURBhIhBxMiMRRRMkFhcYH/xAAYAQADAQEAAAAAAAAAAAAAAAAAAgMBBP/EACIRAAEEAgEEAwAAAAAAAAAAAAEAAgMREiEEMUFRkRMUIv/aAAwDAQACEQMRAD8A9l0pShCUrSydVWCMspkXFtsdwN7ik7SonAGcYrYx58GSvZHmxnlY3YQ6lRx98GkZIx4tptZYulk0pSnWpUI6oavhafiiG/LRHceaKzlXkpPrake8k1NnEJcQpCxlKhgj7Fcf1f0Ntc1lDlhuMmLK7vkqY6p5Aa58E/sbeMc/xVGceHkAxyvLQfA977eipTOkDfwLXO7nqVTrEHUcD5zTqN6Cy06VdnnBUojxBweMj0eKvWO8zXLVedXvbX+w2sI3NoQcpSMDxwDjgZ49mpK30MmW9lxxWsJTCHE7HfgxNqyk/olS/WcVlWrpE2q0RLFcr/cW7S6oLVDYhoZWrCvxW4FK4JHOP74pp4+M3j/RikBbkDsG8LvHpvegb33Kh8MkjhKGUa3vV116+9aUw6BSblcenzd4ufC7hJcfaHIw3wkcZOAdpIH0RSpzbocW3wGIMJhDEaO2lpptA4QlIwAP8pU34ZHAUOw8BdTAWtAKv0pSlTJQkD3SlCFTIzSlKEL/2Q==";
@@ -2112,6 +2256,210 @@ function updateModeUI(){
 }
 /* ============ Toast ============ */
 let toastTimer=null;
+function openExportExcel(){
+  let now=new Date(),cy=now.getFullYear(),cm=now.getMonth();
+  let fy=document.getElementById("expFromY"),fm=document.getElementById("expFromM");
+  let ty=document.getElementById("expToY"),tm=document.getElementById("expToM");
+  if(!fy.innerHTML){
+    let minYear=cy-2,maxYear=cy;
+    state.records.forEach(r=>{let y=parseInt(r.date.split("-")[0]);if(y<minYear)minYear=y;if(y>maxYear)maxYear=y;});
+    [fy,ty].forEach(s=>{for(let y=maxYear;y>=minYear;y--){let o=document.createElement("option");o.value=y;o.textContent=y+"年";s.appendChild(o);}s.value=cy;});
+    [fm,tm].forEach(s=>{for(let m=1;m<=12;m++){let o=document.createElement("option");o.value=m;o.textContent=m+"月";s.appendChild(o);}s.value=cm+1;});
+  }else{fy.value=cy;fm.value=cm+1;ty.value=cy;tm.value=cm+1;}
+  document.getElementById("exportMask").classList.add("show");
+}
+function syncExpRange(){
+  let fy=+document.getElementById("expFromY").value,fm=+document.getElementById("expFromM").value;
+  let ty=+document.getElementById("expToY").value,tm=+document.getElementById("expToM").value;
+  if(ty<fy||(ty===fy&&tm<fm)){ty=fy;tm=fm;document.getElementById("expToY").value=ty;document.getElementById("expToM").value=tm;}
+}
+function closeExportModal(){let m=document.getElementById("exportMask");if(m)m.classList.remove("show");let s=document.getElementById("expStatus");if(s)s.style.display="none"}
+let _xlsxLoading=null,_jszipLoading=null;
+function loadJSZip(){
+  if(window.JSZip)return Promise.resolve(window.JSZip);
+  if(_jszipLoading)return _jszipLoading;
+  _jszipLoading=new Promise((res,rej)=>{
+    let s=document.createElement("script");
+    s.src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";
+    s.onload=()=>res(window.JSZip);
+    s.onerror=()=>{let s2=document.createElement("script");s2.src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js";s2.onload=()=>res(window.JSZip);s2.onerror=()=>rej(new Error("jszip load fail"));document.head.appendChild(s2);};
+    document.head.appendChild(s);
+  });
+  return _jszipLoading;
+}
+function loadXLSX(){
+  if(window.XLSX)return Promise.resolve(window.XLSX);
+  if(_xlsxLoading)return _xlsxLoading;
+  _xlsxLoading=new Promise((res,rej)=>{
+    let s=document.createElement("script");
+    s.src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js";
+    s.onload=()=>res(window.XLSX);
+    s.onerror=()=>{let s2=document.createElement("script");s2.src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js";s2.onload=()=>res(window.XLSX);s2.onerror=()=>rej(new Error("xlsx load fail"));document.head.appendChild(s2);};
+    document.head.appendChild(s);
+  });
+  return _xlsxLoading;
+}
+function doExportExcel(range){
+  let st=document.getElementById("expStatus");
+  let rangeLabel="";
+  if(range==="range"){
+    let fy=+document.getElementById("expFromY").value,fm=+document.getElementById("expFromM").value;
+    let ty=+document.getElementById("expToY").value,tm=+document.getElementById("expToM").value;
+    range={fromY:fy,fromM:fm,toY:ty,toM:tm};
+    rangeLabel=fy+"年"+fm+"月 ~ "+ty+"年"+tm+"月";
+  }
+  if(st){st.style.display="flex";document.getElementById("expStatusText").textContent=rangeLabel?("正在导出 "+rangeLabel+"…"):(range==="month"?"正在生成本月报表…":"正在生成全部报表…");}
+  setTimeout(()=>{loadXLSX().then(XLSX=>buildAndWriteXLSX(XLSX,range)).catch(()=>{csvFallback(range);if(st)st.style.display="none";});},60);
+}
+
+async function buildAndWriteXLSX(XLSX,range){
+  let y=null,m=null,label="";
+  if(range==="month"){y=curY;m=curM+1;label=curY+"-"+(curM+1<10?"0":"")+(curM+1);}
+  else if(range==="all"){label="全部";}
+  else if(typeof range==="object"){label=range.fromY+"年"+range.fromM+"月~"+range.toY+"年"+range.toM+"月";}
+  let recs=state.records.filter(r=>{
+    if(range==="all")return true;
+    if(range==="month"){let p=r.date.split("-");return parseInt(p[0])===y&&parseInt(p[1])===m;}
+    if(typeof range==="object"){let p=r.date.split("-"),ry=parseInt(p[0]),rm=parseInt(p[1]);
+      return (ry>range.fromY||(ry===range.fromY&&rm>=range.fromM))&&(ry<range.toY||(ry===range.toY&&rm<=range.toM));}
+    return true;
+  }).sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id);
+  let st=document.getElementById("expStatus");
+  if(!recs.length){toast("暂无数据可导出");if(st)st.style.display="none";closeExportModal();return;}
+  try{
+    let wb=XLSX.utils.book_new();
+    let s1=[["日期","类别","收/支","金额","备注","附图数","关联ID"]];
+    recs.forEach(r=>s1.push([r.date,catObj(r.cat).n,r.type==="in"?"收入":"支出",r.amt,r.note||"",recImgs(r).length,r.id]));
+    let ws1=XLSX.utils.aoa_to_sheet(s1);
+    ws1["!cols"]=[{wch:12},{wch:12},{wch:8},{wch:12},{wch:26},{wch:8},{wch:18}];
+    XLSX.utils.book_append_sheet(wb,ws1,"账单明细");
+    let s3=[["记录ID","日期","类别","金额","图片数","图片格式"]];
+    let imgList=[];
+    recs.forEach(r=>{
+      let imgs=recImgs(r);
+      if(!imgs.length)return;
+      let formats=[];
+      imgs.forEach((src,i)=>{
+        let mm=src.match(/^data:image\/(png|jpeg|jpg|webp|gif);base64,(.*)$/);
+        if(mm){let t=mm[1]==="jpg"?"jpeg":mm[1];
+          if(t==="png"||t==="jpeg"){imgList.push({base64:mm[2],ext:t,col:5+i,row:s3.length});formats.push(t.toUpperCase());}
+          else formats.push("("+t+")");
+        }else formats.push("未知");
+      });
+      s3.push([r.id,r.date,catObj(r.cat).n,r.amt,imgs.length,formats.join(", ")]);
+    });
+    let ws3=XLSX.utils.aoa_to_sheet(s3);
+    ws3["!cols"]=[{wch:18},{wch:12},{wch:12},{wch:10},{wch:8},{wch:22}];
+    let rowsArr=[];for(let i=0;i<s3.length;i++)rowsArr.push({hpt:i===0?22:(imgList.length?100:18)});
+    ws3["!rows"]=rowsArr;
+    XLSX.utils.book_append_sheet(wb,ws3,"附图清单");
+    let fname="记账台_"+(label||"全部")+".xlsx";
+    let bytes=XLSX.write(wb,{type:'array',bookType:'xlsx'});
+    let finalBytes=bytes;
+    if(imgList.length){
+      try{let JSZip=await loadJSZip();finalBytes=await injectXlsxImages(bytes,JSZip,imgList,wb.SheetNames.length);}
+      catch(e){console.error("IMG_INJECT_FAIL",e);toast("图片嵌入失败，已导出不含图片的版本")}
+    }
+    const outBlob=new Blob([finalBytes],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+    offerExport(outBlob,fname,"已生成 Excel"+(imgList.length?("（含 "+imgList.length+" 张附图）"):""));
+  }catch(e){console.error("EXPORT_FAIL",e);csvFallback(range);}
+  if(st)st.style.display="none";closeExportModal();
+}
+async function injectXlsxImages(bytes,JSZip,imgList,sheetNo){
+  const nsR="http://schemas.openxmlformats.org/officeDocument/2006/relationships";
+  const nsC="http://schemas.openxmlformats.org/package/2006/relationships";
+  const nsD="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing";
+  const nsA="http://schemas.openxmlformats.org/drawingml/2006/main";
+  const zip=await JSZip.loadAsync(bytes);
+  // 1) 写入 media 文件
+  imgList.forEach((im,i)=>{zip.file("xl/media/image"+(i+1)+"."+im.ext,im.base64,{base64:true});});
+  // 2) 构建 drawing XML
+  let anchors="";
+  imgList.forEach((im,i)=>{const rId="rIdImg"+(i+1);
+    anchors+='<xdr:oneCellAnchor><xdr:from><xdr:col>'+im.col+'</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>'+im.row+'</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from><xdr:ext cx="1200000" cy="900000"/>'+
+      '<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="'+(i+1)+'" name="pic'+(i+1)+'"/><xdr:cNvPicPr/></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="'+rId+'"/></xdr:blipFill>'+
+      '<xdr:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="1200000" cy="900000"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:oneCellAnchor>';});
+  zip.file("xl/drawings/drawing1.xml",'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<xdr:wsDr xmlns:xdr="'+nsD+'" xmlns:a="'+nsA+'" xmlns:r="'+nsR+'">'+anchors+'</xdr:wsDr>');
+  // 3) drawing rels
+  let drels="";
+  imgList.forEach((im,i)=>{drels+='<Relationship Id="rIdImg'+(i+1)+'" Type="'+nsC+'/image" Target="../media/image'+(i+1)+'.'+im.ext+'"/>';});
+  zip.file("xl/drawings/_rels/drawing1.xml.rels",'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="'+nsC+'">'+drels+'</Relationships>');
+  // 4) sheet rels —— 添加 drawing 引用
+  const sheetRelsPath="xl/worksheets/_rels/sheet"+sheetNo+".xml.rels";
+  let existing="";
+  if(zip.file(sheetRelsPath)){existing=(await zip.file(sheetRelsPath).async("string")).replace(/<\/?Relationships[^>]*>/g,"").replace(/\s*$/,"");}
+  zip.file(sheetRelsPath,'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="'+nsC+'">'+existing+'<Relationship Id="rIdDraw1" Type="'+nsC+'/drawing" Target="../drawings/drawing1.xml"/></Relationships>');
+  // 5) ★ 关键修复：在 sheet 工作表 XML 中注入 <drawing r:id="rIdDraw1"/>
+  //    没有这行，Excel 不知道该 sheet 有绘图，图片完全不渲染！
+  const sheetXmlPath="xl/worksheets/sheet"+sheetNo+".xml";
+  if(zip.file(sheetXmlPath)){
+    let sheetXml=await zip.file(sheetXmlPath).async("string");
+    if(!sheetXml.includes("<drawing")){
+      // 在 </worksheet> 前插入 drawing 引用
+      sheetXml=sheetXml.replace("</worksheet>",'<drawing r:id="rIdDraw1"/>\n</worksheet>');
+      zip.file(sheetXmlPath,sheetXml);
+    }
+  }
+  // 6) Content_Types
+  let ct=await zip.file("[Content_Types].xml").async("string");
+  if(!ct.includes("drawings/drawing1.xml"))ct=ct.replace("</Types>",'<Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/></Types>');
+  const exts=[...new Set(imgList.map(x=>x.ext))];
+  exts.forEach(e=>{const t=e==="png"?"image/png":"image/jpeg";if(!ct.includes('Extension="'+e+'"'))ct=ct.replace("</Types>",'<Default Extension="'+e+'" ContentType="'+t+'"/></Types>');});
+  zip.file("[Content_Types].xml",ct);
+  return zip.generateAsync({type:"arraybuffer"});
+}
+function csvFallback(range){
+  let recs=state.records.filter(r=>{
+    if(range==="all")return true;
+    if(range==="month"){let p=r.date.split("-");return parseInt(p[0])===curY&&parseInt(p[1])===curM+1;}
+    if(typeof range==="object"){let p=r.date.split("-"),ry=parseInt(p[0]),rm=parseInt(p[1]);
+      return (ry>range.fromY||(ry===range.fromY&&rm>=range.fromM))&&(ry<range.toY||(ry===range.toY&&rm<=range.toM));}
+    return true;
+  });
+  let lines=["\uFEFF日期,类别,收/支,金额,备注,附图数"];
+  recs.forEach(r=>lines.push([r.date,catObj(r.cat).n,r.type==="in"?"收入":"支出",r.amt,(r.note||"").replace(/[,\n\r]/g," "),recImgs(r).length].join(",")));
+  let label=(typeof range==="object")?(range.fromY+"年"+range.fromM+"月~"+range.toY+"年"+range.toM+"月"):(range==="month"?(curY+"-"+(curM+1<10?"0":"")+(curM+1)):"全部");
+  let blob=new Blob([lines.join("\n")],{type:"text/csv;charset=utf-8"});
+  offerExport(blob,"记账台_"+(label||"全部")+".csv","Excel 库加载失败，已生成 CSV（不含图片）");
+}
+let pendingExport=null;
+function offerExport(blob,name,msg){
+  pendingExport={blob,name};
+  const isMobile=/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent||"");
+  if(isMobile){openExportSaveSheet();toast(msg+"，请点『保存到手机』");}
+  else{realSave(blob,name);toast(msg);}
+}
+function openExportSaveSheet(){
+  openSheet('<div class="grab"></div><h2 style="margin:0 0 6px">导出完成</h2><div class="deck" style="margin-bottom:14px">文件已生成，点下方按钮保存到手机</div><button class="exp-go" style="width:100%" onclick="doSaveExport()">保存到手机</button><div id="expSaveHint" style="font-size:12px;color:#888;margin-top:10px;line-height:1.7"></div>');
+  const ua=navigator.userAgent||"",h=document.getElementById("expSaveHint");
+  if(/MicroMessenger/i.test(ua))h.innerHTML="检测到微信内置浏览器：若点击无反应，请点右上角 ⋯ → 在浏览器打开，再重新导出。";
+  else if(/QQ\//i.test(ua))h.innerHTML="检测到 QQ 内置浏览器：若点击无反应，请在系统浏览器中打开本页后导出。";
+  else if(/iP(hone|ad|od)/.test(ua))h.innerHTML="iOS：点击后会弹出分享面板，选「存储到文件」即可存入文件 App。";
+  else h.innerHTML="点击后文件会下载到「下载 / Download」文件夹。";
+}
+function doSaveExport(){if(!pendingExport)return;const b=pendingExport.blob,n=pendingExport.name;pendingExport=null;realSave(b,n);closeSheet();}
+function realSave(blob,name){
+  const ua=navigator.userAgent||"",isMobile=/Mobi|Android|iPhone|iPad|iPod/i.test(ua);
+  const file=new File([blob],name,{type:blob.type||"application/octet-stream"});
+  if(isMobile&&navigator.canShare&&navigator.canShare({files:[file]})){
+    navigator.share({files:[file],title:name}).catch(()=>directDownload(blob,name));return;
+  }
+  directDownload(blob,name);
+}
+function directDownload(blob,name){
+  const u=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=u;a.download=name;a.rel="noopener";
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  const ua=navigator.userAgent||"";
+  if(/iP(hone|ad|od)/.test(ua)||/MicroMessenger/i.test(ua)||/QQ\//.test(ua)){
+    setTimeout(()=>{try{window.open(u,"_blank");}catch(e){}},700);
+  }
+  setTimeout(()=>URL.revokeObjectURL(u),5000);
+}
+
+function recThumb(r){let a=recImgs(r);return a.length?'<img class="rec-img" src="'+a[0]+'" onclick="event.stopPropagation();viewImg(\''+r.id+'\')">':''}
+
 function toast(t){let el=document.getElementById("toast");el.textContent=t;el.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove("show"),2400)}
 /* 启动 */
 applyMode();render();renderBills();renderBars();
@@ -2125,6 +2473,31 @@ applyMode();render();renderBills();renderBars();
       <button onclick="mpYear(1)" aria-label="下一年">›</button>
     </div>
     <div class="mp-grid" id="mpGrid"></div>
+  </div>
+</div>
+<div class="modal-mask" id="imgZoom" onclick="if(event.target===this)closeImgZoom()">
+  <div class="imgzoom-box">
+    <div class="imgzoom-bar"><span id="imgZoomIdx">1 / 1</span><div class="imgzoom-bar-r"><button id="imgZoomDel" class="imgzoom-del" onclick="imgZoomDel()">删除</button><button class="imgzoom-x" onclick="closeImgZoom()">✕</button></div></div>
+    <img id="imgZoomImg" class="imgzoom-img" src="">
+    <div class="imgzoom-nav"><button id="imgZoomPrev" onclick="imgZoomPrev()">‹</button><button id="imgZoomNext" onclick="imgZoomNext()">›</button></div>
+  </div>
+</div>
+<div class="modal-mask" id="exportMask" onclick="if(event.target===this)closeExportModal()">
+  <div class="exp-modal">
+    <div class="exp-title">导出 Excel</div>
+    <div class="exp-sub">含账单明细 · 附图（内嵌图片）</div>
+    <div class="exp-range-row">
+      <label class="exp-lbl">从</label>
+      <select id="expFromY" class="exp-sel" onchange="syncExpRange()"></select>
+      <select id="expFromM" class="exp-sel" onchange="syncExpRange()"></select>
+      <span class="exp-sep">至</span>
+      <select id="expToY" class="exp-sel" onchange="syncExpRange()"></select>
+      <select id="expToM" class="exp-sel" onchange="syncExpRange()"></select>
+    </div>
+    <button class="exp-opt" id="expOptAll" onclick="doExportExcel('all')">全部记录</button>
+    <div class="exp-status" id="expStatus" style="display:none"><span class="exp-spin"></span><span id="expStatusText">生成中…</span></div>
+    <button class="exp-go" id="expGoBtn" onclick="doExportExcel('range')">开始导出</button>
+    <button class="exp-cancel" onclick="closeExportModal()">取消</button>
   </div>
 </div>
 </body>
